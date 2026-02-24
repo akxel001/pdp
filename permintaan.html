@@ -1,0 +1,1150 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Permintaan Data Internal — Sistem PDP PT Atri Pasifik</title>
+    <link rel="stylesheet" href="style-pdp.css">
+    <style>
+        /* ===== WORKFLOW TIMELINE ===== */
+        .workflow-timeline {
+            display: flex;
+            align-items: center;
+            gap: 0;
+            margin: 20px 0;
+            padding: 16px 20px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+        }
+
+        .wf-step {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            position: relative;
+        }
+
+        .wf-step:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            right: -50%;
+            top: 18px;
+            width: 100%;
+            height: 2px;
+            background: var(--border);
+            z-index: 0;
+        }
+
+        .wf-step.done:not(:last-child)::after {
+            background: var(--success);
+        }
+
+        .wf-step.active:not(:last-child)::after {
+            background: linear-gradient(to right, var(--warning), var(--border));
+        }
+
+        .wf-dot {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            z-index: 1;
+            border: 2px solid var(--border);
+            background: var(--bg);
+        }
+
+        .wf-step.done .wf-dot {
+            background: var(--success);
+            border-color: var(--success);
+            color: white;
+        }
+
+        .wf-step.active .wf-dot {
+            background: var(--warning);
+            border-color: var(--warning);
+            color: white;
+            box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.2);
+        }
+
+        .wf-step.rejected .wf-dot {
+            background: var(--danger);
+            border-color: var(--danger);
+            color: white;
+        }
+
+        .wf-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-top: 6px;
+        }
+
+        .wf-sublabel {
+            font-size: 10px;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .wf-step.done .wf-label {
+            color: var(--success);
+        }
+
+        .wf-step.active .wf-label {
+            color: var(--warning);
+        }
+
+        .wf-step.rejected .wf-label {
+            color: var(--danger);
+        }
+
+        /* ===== PERMINTAAN CARDS ===== */
+        .perm-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 16px 20px;
+            transition: var(--transition);
+            cursor: pointer;
+        }
+
+        .perm-card:hover {
+            border-color: var(--primary);
+            box-shadow: var(--shadow-md);
+        }
+
+        .perm-card-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+
+        .perm-card-id {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--primary);
+            font-family: monospace;
+        }
+
+        .perm-card-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin: 4px 0;
+        }
+
+        .perm-card-meta {
+            font-size: 12px;
+            color: var(--text-muted);
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-top: 8px;
+        }
+
+        .perm-meta-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .perm-card-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid var(--border);
+        }
+
+        .deadline-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 3px 8px;
+            border-radius: var(--radius-full);
+        }
+
+        .deadline-chip.ok {
+            background: #D1FAE5;
+            color: #059669;
+        }
+
+        .deadline-chip.warn {
+            background: #FEF3C7;
+            color: #D97706;
+        }
+
+        .deadline-chip.urgent {
+            background: #FEE2E2;
+            color: #DC2626;
+        }
+
+        .deadline-chip.expired {
+            background: #F3F4F6;
+            color: #6B7280;
+        }
+
+        /* ===== FORM STYLES ===== */
+        .form-section-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--primary-light);
+            margin-bottom: 16px;
+            margin-top: 8px;
+        }
+
+        .form-grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .form-grid-3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 16px;
+        }
+
+        /* ===== APPROVAL ACTION BAR ===== */
+        .approval-action-bar {
+            background: linear-gradient(135deg, #EEF2FF, #F0FDF4);
+            border: 1px solid #C7D2FE;
+            border-radius: var(--radius-md);
+            padding: 16px 20px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .approval-action-bar.waiting {
+            background: linear-gradient(135deg, #FEF3C7, #FFFBEB);
+            border-color: #FCD34D;
+        }
+
+        .approval-action-bar .action-info h4 {
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .approval-action-bar .action-info p {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 3px;
+        }
+
+        /* Detail modal timeline */
+        .detail-timeline {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+        }
+
+        .dt-item {
+            display: flex;
+            gap: 12px;
+            position: relative;
+        }
+
+        .dt-item:not(:last-child) .dt-line {
+            position: absolute;
+            left: 15px;
+            top: 32px;
+            bottom: 0;
+            width: 2px;
+            background: var(--border);
+        }
+
+        .dt-dot {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            flex-shrink: 0;
+            z-index: 1;
+        }
+
+        .dt-dot.done {
+            background: #D1FAE5;
+        }
+
+        .dt-dot.active {
+            background: #FEF3C7;
+        }
+
+        .dt-dot.pending {
+            background: #F3F4F6;
+        }
+
+        .dt-dot.rejected {
+            background: #FEE2E2;
+        }
+
+        .dt-content {
+            padding: 4px 0 20px;
+            flex: 1;
+        }
+
+        .dt-content h5 {
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .dt-content p {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .dt-content .dt-time {
+            font-size: 11px;
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
+        .dt-content .dt-note {
+            font-size: 12px;
+            color: var(--text-secondary);
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 6px 10px;
+            margin-top: 6px;
+        }
+
+        /* Expiring badge */
+        .expiry-banner {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 14px;
+            border-radius: var(--radius-sm);
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .expiry-banner.warn {
+            background: #FEF3C7;
+            color: #B45309;
+        }
+
+        .expiry-banner.expired {
+            background: #FEE2E2;
+            color: #B91C1C;
+        }
+
+        /* Stats row */
+        .perm-stats {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .perm-stat {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 14px 16px;
+            text-align: center;
+        }
+
+        .perm-stat-value {
+            font-size: 24px;
+            font-weight: 800;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        .perm-stat-label {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 3px;
+        }
+
+        .perm-stat-value.blue {
+            color: var(--primary);
+        }
+
+        .perm-stat-value.orange {
+            color: var(--warning);
+        }
+
+        .perm-stat-value.green {
+            color: var(--success);
+        }
+
+        .perm-stat-value.red {
+            color: var(--danger);
+        }
+
+        .perm-stat-value.gray {
+            color: var(--text-muted);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app-layout">
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    <img src="logo-atri.png" alt="AP"
+                        onerror="this.style.display='none'; this.parentElement.innerHTML='<span style=\'font-size:16px;font-weight:800;color:#1B2B6B\'>AP</span>'">
+                </div>
+                <div class="sidebar-brand">
+                    <h3>Sistem PDP</h3>
+                    <span>PT Atri Pasifik</span>
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-section-title">Menu Utama</div>
+                <a class="nav-item" href="dashboard.html"><span class="nav-icon">📊</span> Dashboard</a>
+                <a class="nav-item" href="inventaris.html"><span class="nav-icon">🗂️</span> Inventaris Data</a>
+                <a class="nav-item" href="consent.html"><span class="nav-icon">✅</span> Manajemen Consent</a>
+                <a class="nav-item" href="dsr.html"><span class="nav-icon">👤</span> Hak Subjek Data</a>
+                <a class="nav-item active" href="permintaan.html"><span class="nav-icon">📁</span> Permintaan Internal
+                    <span class="nav-badge" id="sidebarPermBadge"></span></a>
+                <div class="nav-section-title">Kepatuhan</div>
+                <a class="nav-item" href="dpia.html"><span class="nav-icon">⚠️</span> Penilaian Risiko (DPIA)</a>
+                <a class="nav-item" href="insiden.html"><span class="nav-icon">🚨</span> Insiden &amp; Pelanggaran</a>
+                <div class="nav-section-title">Administrasi</div>
+                <a class="nav-item" href="dokumen.html"><span class="nav-icon">📄</span> Dokumen &amp; Kebijakan</a>
+                <a class="nav-item" href="audit.html"><span class="nav-icon">📋</span> Audit Trail</a>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <div class="user-avatar" id="sidebarUserAvatar">A</div>
+                    <div class="user-meta">
+                        <h4 id="sidebarUserName">Admin PDP</h4>
+                        <span id="sidebarUserRole">DPO</span>
+                    </div>
+                    <button onclick="logout()"
+                        style="margin-left:auto;background:none;border:none;color:rgba(255,255,255,0.5);cursor:pointer;font-size:18px;"
+                        title="Logout">🚪</button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- MAIN -->
+        <div class="main-content">
+            <header class="topbar">
+                <div class="topbar-title">
+                    <h2>📁 Permintaan Data Internal</h2>
+                    <p>Kelola proses pengajuan & persetujuan penggunaan data pribadi untuk keperluan internal</p>
+                </div>
+                <div class="topbar-actions">
+                    <button class="topbar-icon-btn" onclick="window.location.href='audit.html'"
+                        title="Audit Trail">📋</button>
+                    <button class="btn btn-primary btn-sm" onclick="openModal('modalAjukan')">+ Ajukan
+                        Permintaan</button>
+                </div>
+            </header>
+
+            <div class="page-content">
+
+                <!-- EXPIRING ALERTS -->
+                <div id="expiryAlerts"></div>
+
+                <!-- STATS -->
+                <div class="perm-stats" id="permStats">
+                    <div class="perm-stat">
+                        <div class="perm-stat-value blue" id="statTotal">0</div>
+                        <div class="perm-stat-label">Total Permintaan</div>
+                    </div>
+                    <div class="perm-stat">
+                        <div class="perm-stat-value orange" id="statMenunggu">0</div>
+                        <div class="perm-stat-label">Menunggu Approval</div>
+                    </div>
+                    <div class="perm-stat">
+                        <div class="perm-stat-value green" id="statDisetujui">0</div>
+                        <div class="perm-stat-label">Disetujui & Aktif</div>
+                    </div>
+                    <div class="perm-stat">
+                        <div class="perm-stat-value red" id="statDitolak">0</div>
+                        <div class="perm-stat-label">Ditolak</div>
+                    </div>
+                    <div class="perm-stat">
+                        <div class="perm-stat-value gray" id="statKadaluwarsa">0</div>
+                        <div class="perm-stat-label">Kadaluwarsa</div>
+                    </div>
+                </div>
+
+                <!-- FILTER BAR -->
+                <div class="card" style="margin-bottom:16px;">
+                    <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
+                        <div class="input-wrapper" style="flex:1; min-width:200px;">
+                            <span class="input-icon">🔍</span>
+                            <input type="text" id="searchInput" class="form-control"
+                                placeholder="Cari pemohon, tujuan, kategori..." oninput="renderTable()">
+                        </div>
+                        <select id="filterStatus" class="form-control" style="width:200px;" onchange="renderTable()">
+                            <option value="">Semua Status</option>
+                            <option value="DRAFT">Draft</option>
+                            <option value="MENUNGGU_KADIV">Menunggu Kadiv</option>
+                            <option value="MENUNGGU_DPO">Menunggu DPO</option>
+                            <option value="DISETUJUI">Disetujui</option>
+                            <option value="DITOLAK">Ditolak</option>
+                            <option value="KADALUWARSA">Kadaluwarsa</option>
+                        </select>
+                        <select id="filterDept" class="form-control" style="width:180px;" onchange="renderTable()">
+                            <option value="">Semua Departemen</option>
+                            <option value="HR">HR</option>
+                            <option value="IT">IT</option>
+                            <option value="Finance">Finance</option>
+                            <option value="Marketing">Marketing</option>
+                            <option value="Legal">Legal</option>
+                            <option value="Operations">Operations</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- TABLE -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">📋 Daftar Permintaan Data</div>
+                        <span class="badge badge-default" id="totalCount">0 permintaan</span>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table" id="permTable">
+                            <thead>
+                                <tr>
+                                    <th>ID &amp; Tujuan</th>
+                                    <th>Pemohon &amp; Departemen</th>
+                                    <th>Kategori Data</th>
+                                    <th>Periode Akses</th>
+                                    <th>Status</th>
+                                    <th>Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="permTableBody">
+                                <tr>
+                                    <td colspan="6" class="text-center text-muted">Memuat data...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- ===================== MODAL: AJUKAN PERMINTAAN ===================== -->
+    <div class="modal-overlay" id="modalAjukan">
+        <div class="modal" style="max-width:680px;">
+            <div class="modal-header">
+                <div class="modal-icon" style="background:#EEF2FF;">📁</div>
+                <div>
+                    <div class="modal-title">Ajukan Permintaan Data Internal</div>
+                    <div class="modal-subtitle">Sesuai Pasal 20 UU No. 27 Tahun 2022 tentang PDP</div>
+                </div>
+                <button class="modal-close" onclick="closeModal('modalAjukan')">✕</button>
+            </div>
+            <div class="modal-body">
+                <form id="formAjukan" onsubmit="submitPermintaan(event)">
+                    <div class="form-section-title">① Informasi Pemohon</div>
+                    <div class="form-grid-2">
+                        <div class="form-group">
+                            <label class="form-label">Nama Pemohon <span class="required">*</span></label>
+                            <input type="text" id="aNama" class="form-control" placeholder="Nama lengkap" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Email Pemohon <span class="required">*</span></label>
+                            <input type="email" id="aEmail" class="form-control" placeholder="nama@atripasifik.co.id"
+                                required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Departemen <span class="required">*</span></label>
+                            <select id="aDept" class="form-control" required>
+                                <option value="">-- Pilih Departemen --</option>
+                                <option>HR</option>
+                                <option>IT</option>
+                                <option>Finance</option>
+                                <option>Marketing</option>
+                                <option>Legal</option>
+                                <option>Operations</option>
+                                <option>Procurement</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Nama Kepala Divisi <span class="required">*</span></label>
+                            <input type="text" id="aKadiv" class="form-control"
+                                placeholder="Nama kepala divisi yang akan menyetujui" required>
+                        </div>
+                    </div>
+
+                    <div class="form-section-title">② Detail Permintaan Data</div>
+                    <div class="form-group">
+                        <label class="form-label">Tujuan Penggunaan Data <span class="required">*</span></label>
+                        <textarea id="aTujuan" class="form-control" rows="2"
+                            placeholder="Jelaskan secara spesifik untuk apa data ini akan digunakan..."
+                            required></textarea>
+                    </div>
+                    <div class="form-grid-2">
+                        <div class="form-group">
+                            <label class="form-label">Kategori Data yang Diminta <span class="required">*</span></label>
+                            <select id="aKategori" class="form-control" required>
+                                <option value="">-- Pilih Kategori --</option>
+                                <option>Data Karyawan (Identitas & Kontak)</option>
+                                <option>Data Kesehatan Karyawan</option>
+                                <option>Data Keuangan & Penggajian</option>
+                                <option>Data Pelanggan (CRM)</option>
+                                <option>Data Transaksi Keuangan</option>
+                                <option>Data Log Akses IT</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Dasar Hukum Pemrosesan <span class="required">*</span></label>
+                            <select id="aDasar" class="form-control" required>
+                                <option value="">-- Pilih Dasar Hukum --</option>
+                                <option>Persetujuan Subjek Data (Pasal 20 ayat 1)</option>
+                                <option>Pemenuhan Kontrak (Pasal 20 ayat 2)</option>
+                                <option>Kewajiban Hukum (Pasal 20 ayat 3)</option>
+                                <option>Kepentingan Vital (Pasal 20 ayat 4)</option>
+                                <option>Kepentingan Sah Pengendali (Pasal 21)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Jumlah Subjek Data Terdampak</label>
+                            <input type="number" id="aJumlah" class="form-control" placeholder="Estimasi jumlah orang"
+                                min="1">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Sensitivitas Data</label>
+                            <select id="aSensitivitas" class="form-control">
+                                <option value="RENDAH">Rendah (data umum)</option>
+                                <option value="SEDANG">Sedang (data pribadi biasa)</option>
+                                <option value="TINGGI">Tinggi (data sensitif)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-section-title">③ Batasan Waktu Penggunaan</div>
+                    <div class="form-grid-2">
+                        <div class="form-group">
+                            <label class="form-label">Tanggal Mulai Akses <span class="required">*</span></label>
+                            <input type="date" id="aTglMulai" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Tanggal Selesai / Kadaluwarsa <span
+                                    class="required">*</span></label>
+                            <input type="date" id="aTglSelesai" class="form-control" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Catatan Tambahan / Spesifikasi Khusus</label>
+                        <textarea id="aCatatan" class="form-control" rows="2"
+                            placeholder="Apakah data perlu dianonimi? Apakah ada pembatasan akses tertentu?"></textarea>
+                    </div>
+
+                    <div class="form-group" style="margin-top:8px;">
+                        <label style="display:flex; gap:10px; align-items:flex-start; cursor:pointer;">
+                            <input type="checkbox" id="aKonfirmasi" required style="margin-top:2px; flex-shrink:0;">
+                            <span style="font-size:12px; color:var(--text-secondary);">
+                                Saya menyatakan bahwa penggunaan data ini memiliki dasar hukum yang sah sesuai UU No. 27
+                                Tahun 2022
+                                tentang Perlindungan Data Pribadi, dan saya bertanggung jawab atas keamanan data selama
+                                periode penggunaan.
+                            </span>
+                        </label>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeModal('modalAjukan')">Batal</button>
+                <button class="btn btn-primary" onclick="document.getElementById('formAjukan').requestSubmit()">📤 Kirim
+                    Permohonan</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================== MODAL: DETAIL & APPROVAL ===================== -->
+    <div class="modal-overlay" id="modalDetail">
+        <div class="modal" style="max-width:720px;">
+            <div class="modal-header">
+                <div class="modal-icon" style="background:#EEF2FF;">📁</div>
+                <div>
+                    <div class="modal-title" id="detailTitle">Detail Permintaan</div>
+                    <div class="modal-subtitle" id="detailSubtitle">—</div>
+                </div>
+                <button class="modal-close" onclick="closeModal('modalDetail')">✕</button>
+            </div>
+            <div class="modal-body" id="detailBody">
+                <!-- Diisi via JS -->
+            </div>
+            <div class="modal-footer" id="detailFooter">
+                <button class="btn btn-outline" onclick="closeModal('modalDetail')">Tutup</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================== MODAL: CATATAN PENOLAKAN ===================== -->
+    <div class="modal-overlay" id="modalTolak">
+        <div class="modal" style="max-width:480px;">
+            <div class="modal-header">
+                <div class="modal-icon danger">❌</div>
+                <div>
+                    <div class="modal-title">Konfirmasi Penolakan</div>
+                    <div class="modal-subtitle">Berikan alasan penolakan untuk dicatat</div>
+                </div>
+                <button class="modal-close" onclick="closeModal('modalTolak')">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">Alasan Penolakan <span class="required">*</span></label>
+                    <textarea id="alasanTolak" class="form-control" rows="4"
+                        placeholder="Jelaskan alasan penolakan permintaan ini..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeModal('modalTolak')">Batal</button>
+                <button class="btn btn-danger" onclick="konfirmasiTolak()">❌ Tolak Permintaan</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        let currentActionId = null;
+
+        // ===================== INIT =====================
+        document.addEventListener('DOMContentLoaded', () => {
+            requireAuth();
+            checkAndExpirePermintaan();
+            renderTable();
+            renderStats();
+            renderExpiryAlerts();
+            updateSidebarBadge();
+
+            // Set default tanggal form
+            const today = new Date().toISOString().split('T')[0];
+            const nextMonth = new Date(Date.now() + 30 * 86400000).toISOString().split('T')[0];
+            document.getElementById('aTglMulai').value = today;
+            document.getElementById('aTglSelesai').value = nextMonth;
+
+            // Prefill user info jika sudah login
+            const user = getCurrentUser();
+            document.getElementById('aNama').value = user.name || '';
+            document.getElementById('aEmail').value = user.email || '';
+        });
+
+        // ===================== DATA =====================
+        function getPermintaan() {
+            return JSON.parse(localStorage.getItem('pdp_permintaan') || '[]');
+        }
+        function savePermintaan(data) {
+            localStorage.setItem('pdp_permintaan', JSON.stringify(data));
+        }
+
+        function checkAndExpirePermintaan() {
+            const list = getPermintaan();
+            const today = new Date().toISOString().split('T')[0];
+            let changed = false;
+            list.forEach(p => {
+                if (p.status === 'DISETUJUI' && p.tglSelesai && p.tglSelesai < today) {
+                    p.status = 'KADALUWARSA';
+                    changed = true;
+                    addAuditLog('PERM_EXPIRE', `Permintaan ${p.id} kadaluwarsa — periode akses berakhir`);
+                }
+            });
+            if (changed) savePermintaan(list);
+        }
+
+        // ===================== RENDER TABLE =====================
+        function renderTable() {
+            const list = getPermintaan();
+            const q = document.getElementById('searchInput').value.toLowerCase();
+            const filterStatus = document.getElementById('filterStatus').value;
+            const filterDept = document.getElementById('filterDept').value;
+
+            const filtered = list.filter(p => {
+                const match = !q || [p.pemohon, p.tujuan, p.kategori, p.dept, p.id].join(' ').toLowerCase().includes(q);
+                const matchStatus = !filterStatus || p.status === filterStatus;
+                const matchDept = !filterDept || p.dept === filterDept;
+                return match && matchStatus && matchDept;
+            });
+
+            document.getElementById('totalCount').textContent = `${filtered.length} permintaan`;
+            const tbody = document.getElementById('permTableBody');
+            if (filtered.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted" style="padding:30px;">Tidak ada data yang sesuai filter</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = filtered.map(p => {
+                const deadlineChip = getDeadlineChip(p);
+                return `
+        <tr>
+          <td>
+            <div style="font-size:11px;font-weight:700;color:var(--primary);font-family:monospace;">${p.id}</div>
+            <div style="font-size:13px;font-weight:600;margin:3px 0;">${p.tujuan.length > 50 ? p.tujuan.slice(0, 50) + '…' : p.tujuan}</div>
+            <div style="font-size:11px;color:var(--text-muted);">Dasar: ${p.dasar}</div>
+          </td>
+          <td>
+            <div style="font-size:13px;font-weight:600;">${p.pemohon}</div>
+            <div style="font-size:11px;color:var(--text-muted);">${p.dept}</div>
+          </td>
+          <td>
+            <div style="font-size:12px;">${p.kategori}</div>
+            <span class="badge badge-${p.sensitivitas === 'TINGGI' ? 'danger' : p.sensitivitas === 'SEDANG' ? 'warning' : 'info'}" style="margin-top:3px;">${p.sensitivitas}</span>
+          </td>
+          <td>
+            <div style="font-size:11px;"><strong>Mulai:</strong> ${formatDate(p.tglMulai)}</div>
+            <div style="font-size:11px;"><strong>Selesai:</strong> ${formatDate(p.tglSelesai)}</div>
+            <div style="margin-top:4px;">${deadlineChip}</div>
+          </td>
+          <td>${getStatusBadgePerm(p.status)}</td>
+          <td>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;">
+              <button class="btn btn-outline btn-sm" onclick="openDetail('${p.id}')">🔍 Detail</button>
+              ${getActionBtn(p)}
+            </div>
+          </td>
+        </tr>
+      `;
+            }).join('');
+        }
+
+        function getDeadlineChip(p) {
+            if (p.status === 'KADALUWARSA') return '<span class="deadline-chip expired">⏰ Kadaluwarsa</span>';
+            if (p.status !== 'DISETUJUI') return '';
+            const today = new Date();
+            const end = new Date(p.tglSelesai);
+            const diff = Math.ceil((end - today) / 86400000);
+            if (diff < 0) return '<span class="deadline-chip expired">⏰ Kadaluwarsa</span>';
+            if (diff <= 3) return `<span class="deadline-chip urgent">🔴 ${diff} hari lagi</span>`;
+            if (diff <= 7) return `<span class="deadline-chip warn">⚠️ ${diff} hari lagi</span>`;
+            return `<span class="deadline-chip ok">✅ ${diff} hari lagi</span>`;
+        }
+
+        function getStatusBadgePerm(status) {
+            const map = {
+                'DRAFT': ['default', '✏️ Draft'],
+                'MENUNGGU_KADIV': ['warning', '⏳ Menunggu Kadiv'],
+                'MENUNGGU_DPO': ['warning', '⏳ Menunggu DPO'],
+                'DISETUJUI': ['success', '✅ Disetujui'],
+                'DITOLAK': ['danger', '❌ Ditolak'],
+                'KADALUWARSA': ['default', '⏰ Kadaluwarsa'],
+            };
+            const [type, label] = map[status] || ['default', status];
+            return `<span class="badge badge-${type}">${label}</span>`;
+        }
+
+        function getActionBtn(p) {
+            const user = getCurrentUser();
+            if (p.status === 'MENUNGGU_KADIV' && (user.role === 'admin' || user.role === 'dpo')) {
+                return `<button class="btn btn-warning btn-sm" onclick="openApprovalKadiv('${p.id}')">👤 Kadiv Review</button>`;
+            }
+            if (p.status === 'MENUNGGU_DPO' && (user.role === 'dpo' || user.role === 'admin')) {
+                return `<button class="btn btn-primary btn-sm" onclick="openApprovalDPO('${p.id}')">🛡️ DPO Approve</button>`;
+            }
+            return '';
+        }
+
+        // ===================== STATS =====================
+        function renderStats() {
+            const list = getPermintaan();
+            document.getElementById('statTotal').textContent = list.length;
+            document.getElementById('statMenunggu').textContent = list.filter(p => p.status === 'MENUNGGU_KADIV' || p.status === 'MENUNGGU_DPO').length;
+            document.getElementById('statDisetujui').textContent = list.filter(p => p.status === 'DISETUJUI').length;
+            document.getElementById('statDitolak').textContent = list.filter(p => p.status === 'DITOLAK').length;
+            document.getElementById('statKadaluwarsa').textContent = list.filter(p => p.status === 'KADALUWARSA').length;
+        }
+
+        function updateSidebarBadge() {
+            const list = getPermintaan();
+            const pending = list.filter(p => p.status === 'MENUNGGU_KADIV' || p.status === 'MENUNGGU_DPO').length;
+            const badge = document.getElementById('sidebarPermBadge');
+            if (badge && pending > 0) badge.textContent = pending;
+        }
+
+        function renderExpiryAlerts() {
+            const list = getPermintaan();
+            const today = new Date();
+            const container = document.getElementById('expiryAlerts');
+            const soon = list.filter(p => {
+                if (p.status !== 'DISETUJUI') return false;
+                const diff = Math.ceil((new Date(p.tglSelesai) - today) / 86400000);
+                return diff >= 0 && diff <= 7;
+            });
+            if (soon.length === 0) { container.innerHTML = ''; return; }
+            container.innerHTML = soon.map(p => {
+                const diff = Math.ceil((new Date(p.tglSelesai) - today) / 86400000);
+                const cls = diff <= 3 ? 'urgent' : 'warn';
+                return `<div class="expiry-banner ${cls}">⏰ <strong>${p.id}</strong> — Akses data "${p.kategori}" akan berakhir dalam <strong>${diff} hari</strong> (${formatDate(p.tglSelesai)}). Segera tindak lanjut jika perlu perpanjangan.</div>`;
+            }).join('');
+        }
+
+        // ===================== SUBMIT PERMINTAAN =====================
+        function submitPermintaan(e) {
+            e.preventDefault();
+            const list = getPermintaan();
+            const id = `PERM-${new Date().getFullYear()}-${String(Date.now()).slice(-4)}`;
+            const now = new Date().toISOString();
+            const user = getCurrentUser();
+
+            const item = {
+                id,
+                pemohon: document.getElementById('aNama').value,
+                emailPemohon: document.getElementById('aEmail').value,
+                dept: document.getElementById('aDept').value,
+                kadiv: document.getElementById('aKadiv').value,
+                tujuan: document.getElementById('aTujuan').value,
+                kategori: document.getElementById('aKategori').value,
+                dasar: document.getElementById('aDasar').value,
+                jumlah: document.getElementById('aJumlah').value || '-',
+                sensitivitas: document.getElementById('aSensitivitas').value,
+                tglMulai: document.getElementById('aTglMulai').value,
+                tglSelesai: document.getElementById('aTglSelesai').value,
+                catatan: document.getElementById('aCatatan').value,
+                status: 'MENUNGGU_KADIV',
+                tglDiajukan: now,
+                timeline: [
+                    { step: 'Pengajuan', status: 'done', by: user.name, time: now, note: 'Permohonan diajukan oleh pemohon' }
+                ]
+            };
+
+            list.unshift(item);
+            savePermintaan(list);
+            addAuditLog('PERM_SUBMIT', `Permintaan data ${id} diajukan oleh ${item.pemohon} (${item.dept}) — Kategori: ${item.kategori}`);
+
+            closeModal('modalAjukan');
+            document.getElementById('formAjukan').reset();
+            renderTable();
+            renderStats();
+            updateSidebarBadge();
+
+            showToast('Permohonan Terkirim', `${id} berhasil diajukan dan menunggu persetujuan Kepala Divisi`, 'success');
+        }
+
+        // ===================== DETAIL MODAL =====================
+        function openDetail(id) {
+            const list = getPermintaan();
+            const p = list.find(x => x.id === id);
+            if (!p) return;
+
+            document.getElementById('detailTitle').textContent = p.id;
+            document.getElementById('detailSubtitle').textContent = p.tujuan;
+
+            const deadlineChip = getDeadlineChip(p);
+            const timelineHTML = buildTimeline(p);
+
+            document.getElementById('detailBody').innerHTML = `
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+        <div>
+          <div class="form-section-title">Informasi Pemohon</div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <div style="display:flex;justify-content:space-between;font-size:13px;"><span class="text-muted">Pemohon</span><strong>${p.pemohon}</strong></div>
+            <div style="display:flex;justify-content:space-between;font-size:13px;"><span class="text-muted">Email</span><strong>${p.emailPemohon}</strong></div>
+            <div style="display:flex;justify-content:space-between;font-size:13px;"><span class="text-muted">Departemen</span><strong>${p.dept}</strong></div>
+            <div style="display:flex;justify-content:space-between;font-size:13px;"><span class="text-muted">Kepala Divisi</span><strong>${p.kadiv}</strong></div>
+          </div>
+          <hr class="divider">
+          <div class="form-section-title">Detail Data</div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <div style="display:flex;justify-content:space-between;font-size:13px;"><span class="text-muted">Kategori</span><strong>${p.kategori}</strong></div>
+            <div style="display:flex;justify-content:space-between;font-size:13px;"><span class="text-muted">Sensitivitas</span><span class="badge badge-${p.sensitivitas === 'TINGGI' ? 'danger' : p.sensitivitas === 'SEDANG' ? 'warning' : 'info'}">${p.sensitivitas}</span></div>
+            <div style="display:flex;justify-content:space-between;font-size:13px;"><span class="text-muted">Jumlah Subjek</span><strong>${p.jumlah}</strong></div>
+            <div style="font-size:13px;"><span class="text-muted">Dasar Hukum:</span> ${p.dasar}</div>
+            <div style="font-size:13px;"><span class="text-muted">Tujuan:</span><br><span style="color:var(--text-primary);">${p.tujuan}</span></div>
+            ${p.catatan ? `<div style="font-size:13px;"><span class="text-muted">Catatan:</span><br>${p.catatan}</div>` : ''}
+          </div>
+          <hr class="divider">
+          <div class="form-section-title">Batasan Waktu</div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <div style="display:flex;justify-content:space-between;font-size:13px;"><span class="text-muted">Mulai Akses</span><strong>${formatDate(p.tglMulai)}</strong></div>
+            <div style="display:flex;justify-content:space-between;font-size:13px;"><span class="text-muted">Selesai Akses</span><strong>${formatDate(p.tglSelesai)}</strong></div>
+            <div>${deadlineChip || getStatusBadgePerm(p.status)}</div>
+          </div>
+        </div>
+        <div>
+          <div class="form-section-title">Alur Persetujuan</div>
+          ${buildWorkflowDisplay(p)}
+          <hr class="divider">
+          <div class="form-section-title">Riwayat Aktivitas</div>
+          <div class="detail-timeline">${timelineHTML}</div>
+        </div>
+      </div>
+    `;
+
+            // Tombol aksi di footer sesuai status
+            const footer = document.getElementById('detailFooter');
+            const user = getCurrentUser();
+            let actionBtns = '';
+            if (p.status === 'MENUNGGU_KADIV' && (user.role === 'admin' || user.role === 'dpo')) {
+                actionBtns = `
+        <button class="btn btn-success" onclick="closeModal('modalDetail');openApprovalKadiv('${p.id}')">✅ Setujui (Kadiv)</button>
+        <button class="btn btn-danger" onclick="closeModal('modalDetail');openTolakModal('${p.id}','kadiv')">❌ Tolak</button>
+      `;
+            } else if (p.status === 'MENUNGGU_DPO' && (user.role === 'dpo' || user.role === 'admin')) {
+                actionBtns = `
+        <button class="btn btn-primary" onclick="closeModal('modalDetail');openApprovalDPO('${p.id}')">🛡️ Approve (DPO)</button>
+        <button class="btn btn-danger" onclick="closeModal('modalDetail');openTolakModal('${p.id}','dpo')">❌ Tolak</button>
+      `;
+            }
+            footer.innerHTML = `<button class="btn btn-outline" onclick="closeModal('modalDetail')">Tutup</button>${actionBtns}`;
+
+            openModal('modalDetail');
+        }
+
+        function buildWorkflowDisplay(p) {
+            const steps = [
+                { key: 'submit', label: 'Pengajuan', sublabel: 'Staff/Pemohon', icon: '📤' },
+                { key: 'kadiv', label: 'Kadiv Review', sublabel: 'Kepala Divisi', icon: '👤' },
+                { key: 'dpo', label: 'DPO Approve', sublabel: 'Data Protection Officer', icon: '🛡️' },
+                { key: 'done', label: 'Selesai', sublabel: 'Keputusan Final', icon: '✅' },
+            ];
+            const statusMap = {
+                'DRAFT': 0, 'MENUNGGU_KADIV': 1, 'MENUNGGU_DPO': 2, 'DISETUJUI': 3, 'DITOLAK': 3, 'KADALUWARSA': 3
+            };
+            const activeIdx = statusMap[p.status] ?? 0;
+
+            return `<div class="workflow-timeline">` + steps.map((s, i) => {
+                let cls = i < activeIdx ? 'done' : i === activeIdx ? 'active' : '';
+                if (p.status === 'DITOLAK' && i === activeIdx) cls = 'rejected';
+                return `<div class="wf-step ${cls}">
+        <div class="wf-dot">${i < activeIdx ? '✓' : s.icon}</div>
+        <div class="wf-label">${s.label}</div>
+        <div class="wf-sublabel">${s.sublabel}</div>
+      </div>`;
+            }).join('') + `</div>`;
+        }
+
+        function buildTimeline(p) {
+            if (!p.timeline || p.timeline.length === 0) return '<p class="text-muted" style="font-size:12px;">Belum ada aktivitas</p>';
+            return p.timeline.map((t, i) => {
+                const isLast = i === p.timeline.length - 1;
+                const dotCls = t.status || 'done';
+                return `
+        <div class="dt-item">
+          ${!isLast ? '<div class="dt-line"></div>' : ''}
+          <div class="dt-dot ${dotCls}">${t.status === 'done' ? '✅' : t.status === 'rejected' ? '❌' : '⏳'}</div>
+          <div class="dt-content">
+            <h5>${t.step}</h5>
+            <div class="dt-time">oleh ${t.by} · ${formatDateTime(t.time)}</div>
+            ${t.note ? `<div class="dt-note">${t.note}</div>` : ''}
+          </div>
+        </div>
+      `;
+            }).join('');
+        }
+
+        // ===================== APPROVAL — KADIV =====================
+        let pendingActionId = null;
+        let pendingActionRole = null;
+
+        function openApprovalKadiv(id) {
+            pendingActionId = id;
+            const list = getPermintaan();
+            const p = list.find(x => x.id === id);
+            if (!p) return;
+            const user = getCurrentUser();
+            const now = new Date().toISOString();
+
+            p.status = 'MENUNGGU_DPO';
+            p.timeline.push({ step: 'Disetujui Kepala Divisi', status: 'done', by: user.name + ` (${p.kadiv})`, time: now, note: `Permohonan disetujui oleh Kepala Divisi ${p.dept}, diteruskan ke DPO` });
+            savePermintaan(list);
+            addAuditLog('PERM_KADIV_APPROVE', `${id} disetujui Kepala Divisi — diteruskan ke DPO`);
+
+            renderTable();
+            renderStats();
+            updateSidebarBadge();
+            showToast('Kadiv Menyetujui', `${id} diteruskan ke DPO untuk persetujuan final`, 'success');
+        }
+
+        function openApprovalDPO(id) {
+            pendingActionId = id;
+            const list = getPermintaan();
+            const p = list.find(x => x.id === id);
+            if (!p) return;
+            const user = getCurrentUser();
+            const now = new Date().toISOString();
+
+            p.status = 'DISETUJUI';
+            p.timeline.push({ step: 'Disetujui DPO', status: 'done', by: user.name, time: now, note: `Permintaan resmi disetujui oleh DPO. Akses data berlaku hingga ${formatDate(p.tglSelesai)}.` });
+            savePermintaan(list);
+            addAuditLog('PERM_DPO_APPROVE', `${id} disetujui DPO — Akses aktif hingga ${p.tglSelesai}`);
+
+            // Kirim email notifikasi
+            EmailNotif.send({
+                to: p.emailPemohon,
+                toName: p.pemohon,
+                type: 'permintaan',
+                requestId: id,
+                requestType: `Permintaan Data Internal — ${p.kategori}`,
+                status: 'DISETUJUI',
+                reason: `Akses data diberikan mulai ${formatDate(p.tglMulai)} hingga ${formatDate(p.tglSelesai)}.`,
+            });
+
+            renderTable();
+            renderStats();
+            updateSidebarBadge();
+        }
+
+        // ===================== PENOLAKAN =====================
+        function openTolakModal(id, role) {
+            pendingActionId = id;
+            pendingActionRole = role;
+            document.getElementById('alasanTolak').value = '';
+            openModal('modalTolak');
+        }
+
+        function konfirmasiTolak() {
+            const alasan = document.getElementById('alasanTolak').value.trim();
+            if (!alasan) { showToast('Wajib Diisi', 'Masukkan alasan penolakan', 'error'); return; }
+
+            const list = getPermintaan();
+            const p = list.find(x => x.id === pendingActionId);
+            if (!p) return;
+            const user = getCurrentUser();
+            const now = new Date().toISOString();
+            const stepLabel = pendingActionRole === 'kadiv' ? 'Ditolak Kepala Divisi' : 'Ditolak DPO';
+
+            p.status = 'DITOLAK';
+            p.timeline.push({ step: stepLabel, status: 'rejected', by: user.name, time: now, note: alasan });
+            savePermintaan(list);
+            addAuditLog('PERM_REJECT', `${pendingActionId} ditolak — Alasan: ${alasan}`);
+
+            // Kirim email penolakan
+            EmailNotif.send({
+                to: p.emailPemohon,
+                toName: p.pemohon,
+                type: 'permintaan',
+                requestId: p.id,
+                requestType: `Permintaan Data Internal — ${p.kategori}`,
+                status: 'DITOLAK',
+                reason: alasan,
+            });
+
+            closeModal('modalTolak');
+            renderTable();
+            renderStats();
+            updateSidebarBadge();
+            showToast('Permintaan Ditolak', `${pendingActionId} telah ditolak dan pemohon diberitahu`, 'error');
+        }
+    </script>
+</body>
+
+</html>

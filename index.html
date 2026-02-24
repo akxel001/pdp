@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login — Sistem PDP PT Atri Pasifik</title>
+  <link rel="stylesheet" href="style-pdp.css">
+  <style>
+    .uu-badge { 
+      display: flex; align-items: center; gap: 8px;
+      background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
+      color: rgba(255,255,255,0.9); font-size: 12px; font-weight: 500;
+      padding: 8px 14px; border-radius: var(--radius-full);
+      margin-bottom: 32px; backdrop-filter: blur(4px);
+    }
+    .uu-badge span { font-size: 10px; opacity: 0.7; }
+    .role-select-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+    .role-card {
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 12px 8px; text-align: center;
+      cursor: pointer; transition: var(--transition);
+    }
+    .role-card:hover { border-color: var(--primary); background: #EEF2FF; }
+    .role-card.selected { border-color: var(--primary); background: #EEF2FF; }
+    .role-card input { display: none; }
+    .role-card-icon { font-size: 22px; margin-bottom: 4px; }
+    .role-card-label { font-size: 11px; font-weight: 600; color: var(--text-secondary); }
+    .role-card.selected .role-card-label { color: var(--primary); }
+    .forgot-link { font-size: 12px; color: var(--primary); text-decoration: none; font-weight: 600; }
+    .forgot-link:hover { text-decoration: underline; }
+    .login-demo-info {
+      margin-top: 24px; padding: 14px;
+      background: var(--info-bg); border-radius: var(--radius-sm);
+      border: 1px solid #BFDBFE;
+    }
+    .login-demo-info p { font-size: 12px; color: #1E40AF; text-align: center; }
+    .login-demo-info strong { font-weight: 700; }
+  </style>
+</head>
+<body>
+<div class="login-page">
+  <!-- LEFT PANEL -->
+  <div class="login-left">
+    <div class="login-brand">
+      <div class="uu-badge">🏛️ Berdasarkan UU No. 27 Tahun 2022 <span>PDP</span></div>
+      <div class="login-logo">
+        <img src="logo-atri.png" alt="PT Atri Pasifik" onerror="this.style.display='none'; this.parentElement.innerHTML='<span style=\'font-size:28px;font-weight:800;color:#1B2B6B;\'>AP</span>'">
+      </div>
+      <h1>Sistem PDP</h1>
+      <p>PT Atri Pasifik — Divisi Kepatuhan Data</p>
+    </div>
+
+    <div class="login-features">
+      <div class="login-feature-item">
+        <div class="login-feature-icon">🗂️</div>
+        <div class="login-feature-text">
+          <h4>Inventaris & Data Mapping</h4>
+          <p>Pemetaan alur data pribadi perusahaan</p>
+        </div>
+      </div>
+      <div class="login-feature-item">
+        <div class="login-feature-icon">✉️</div>
+        <div class="login-feature-text">
+          <h4>Notifikasi Email Otomatis</h4>
+          <p>Subjek data diberitahu saat approval/penolakan</p>
+        </div>
+      </div>
+      <div class="login-feature-item">
+        <div class="login-feature-icon">🛡️</div>
+        <div class="login-feature-text">
+          <h4>Manajemen Hak Subjek Data</h4>
+          <p>Pengelolaan DSR sesuai Pasal 5–9 UU PDP</p>
+        </div>
+      </div>
+      <div class="login-feature-item">
+        <div class="login-feature-icon">📋</div>
+        <div class="login-feature-text">
+          <h4>Audit Trail Lengkap</h4>
+          <p>Rekam jejak aktivitas untuk kepatuhan</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div class="login-right">
+    <div class="login-card">
+      <div class="login-card-header">
+        <div class="login-badge">🔒 Akses Terproteksi</div>
+        <h2>Selamat Datang</h2>
+        <p>Masuk ke Sistem Perlindungan Data Pribadi PT Atri Pasifik</p>
+      </div>
+
+      <form id="loginForm" onsubmit="handleLogin(event)">
+        <!-- Role Selection -->
+        <div class="form-group">
+          <label class="form-label">Masuk Sebagai <span class="required">*</span></label>
+          <div class="role-select-grid">
+            <label class="role-card selected" onclick="selectRole('dpo', this)">
+              <input type="radio" name="role" value="dpo" checked>
+              <div class="role-card-icon">👤</div>
+              <div class="role-card-label">DPO</div>
+            </label>
+            <label class="role-card" onclick="selectRole('admin', this)">
+              <input type="radio" name="role" value="admin">
+              <div class="role-card-icon">🛡️</div>
+              <div class="role-card-label">Admin</div>
+            </label>
+            <label class="role-card" onclick="selectRole('user', this)">
+              <input type="radio" name="role" value="user">
+              <div class="role-card-icon">👥</div>
+              <div class="role-card-label">Staff</div>
+            </label>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="email">Email <span class="required">*</span></label>
+          <div class="input-wrapper">
+            <span class="input-icon">✉️</span>
+            <input type="email" id="email" class="form-control" placeholder="nama@atripasifik.co.id" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+            <label class="form-label" style="margin-bottom:0;" for="password">Password <span class="required">*</span></label>
+            <a href="#" class="forgot-link">Lupa password?</a>
+          </div>
+          <div class="input-wrapper">
+            <span class="input-icon">🔑</span>
+            <input type="password" id="password" class="form-control" placeholder="Masukkan password" required>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-lg" id="loginBtn">
+          <span id="loginBtnText">Masuk ke Sistem</span>
+        </button>
+
+        <div class="login-demo-info">
+          <p>Demo: <strong>admin@atripasifik.co.id</strong> / password: <strong>pdp2024</strong></p>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+  function selectRole(role, el) {
+    document.querySelectorAll('.role-card').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+    document.querySelector(`input[value="${role}"]`).checked = true;
+  }
+
+  function handleLogin(e) {
+    e.preventDefault();
+    const email = document.getElementById('email').value;
+    const pass = document.getElementById('password').value;
+    const btn = document.getElementById('loginBtn');
+    const btnText = document.getElementById('loginBtnText');
+    const role = document.querySelector('input[name="role"]:checked').value;
+
+    btnText.textContent = 'Memverifikasi...';
+    btn.disabled = true;
+
+    setTimeout(() => {
+      // Demo credentials
+      if (email && pass.length >= 4) {
+        const userMap = { dpo: 'Budi Santoso (DPO)', admin: 'Siti Rahayu (Admin)', user: 'Ahmad Fauzi (Staff)' };
+        sessionStorage.setItem('pdp_user', JSON.stringify({ name: userMap[role], role, email }));
+        addAuditLog('LOGIN', `User ${email} berhasil masuk sebagai ${role.toUpperCase()}`);
+        window.location.href = 'dashboard.html';
+      } else {
+        btnText.textContent = 'Masuk ke Sistem';
+        btn.disabled = false;
+        showToast('Login Gagal', 'Email atau password tidak valid', 'error');
+      }
+    }, 1000);
+  }
+
+  function addAuditLog(action, desc) {
+    const logs = JSON.parse(localStorage.getItem('pdp_audit') || '[]');
+    logs.unshift({ id: Date.now(), action, desc, time: new Date().toISOString(), user: document.getElementById('email').value || '-' });
+    if (logs.length > 200) logs.pop();
+    localStorage.setItem('pdp_audit', JSON.stringify(logs));
+  }
+
+  function showToast(title, msg, type='success') {
+    const icons = { success:'✅', error:'❌', warning:'⚠️', info:'ℹ️' };
+    const tc = document.getElementById('toastContainer');
+    const t = document.createElement('div');
+    t.className = `toast ${type === 'error' ? 'error' : type}`;
+    t.innerHTML = `<span class="toast-icon">${icons[type]}</span><div class="toast-text"><h5>${title}</h5><p>${msg}</p></div>`;
+    tc.appendChild(t);
+    setTimeout(() => t.remove(), 4000);
+  }
+</script>
+</body>
+</html>

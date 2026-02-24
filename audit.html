@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audit Trail — Sistem PDP PT Atri Pasifik</title>
+    <link rel="stylesheet" href="style-pdp.css">
+    <style>
+        .log-row td {
+            font-size: 12.5px;
+        }
+
+        .action-tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 700;
+            white-space: nowrap;
+            font-family: monospace;
+            letter-spacing: 0.3px;
+        }
+
+        .action-tag.login {
+            background: #DBEAFE;
+            color: #1E40AF;
+        }
+
+        .action-tag.consent {
+            background: #D1FAE5;
+            color: #065F46;
+        }
+
+        .action-tag.dsr {
+            background: #C7D2FE;
+            color: #3730A3;
+        }
+
+        .action-tag.email {
+            background: #FEF3C7;
+            color: #92400E;
+        }
+
+        .action-tag.insiden {
+            background: #FEE2E2;
+            color: #991B1B;
+        }
+
+        .action-tag.doc {
+            background: #F0FDF4;
+            color: #166534;
+        }
+
+        .action-tag.other {
+            background: var(--bg);
+            color: var(--text-secondary);
+        }
+
+        .email-log-row {
+            background: #FEFCE8;
+        }
+
+        .filter-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app-layout">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo"><img src="logo-atri.png" alt="AP"
+                        onerror="this.style.display='none'; this.parentElement.innerHTML='<span style=\'font-size:16px;font-weight:800;color:#1B2B6B\'>AP</span>'">
+                </div>
+                <div class="sidebar-brand">
+                    <h3>Sistem PDP</h3><span>PT Atri Pasifik</span>
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-section-title">Menu Utama</div>
+                <a class="nav-item" href="dashboard.html"><span class="nav-icon">📊</span> Dashboard</a>
+                <a class="nav-item" href="inventaris.html"><span class="nav-icon">🗂️</span> Inventaris Data</a>
+                <a class="nav-item" href="consent.html"><span class="nav-icon">✅</span> Manajemen Consent</a>
+                <a class="nav-item" href="dsr.html"><span class="nav-icon">👤</span> Hak Subjek Data</a>
+                <a class="nav-item" href="permintaan.html"><span class="nav-icon">📁</span> Permintaan Internal</a>
+                <div class="nav-section-title">Kepatuhan</div>
+                <a class="nav-item" href="dpia.html"><span class="nav-icon">⚠️</span> Penilaian Risiko (DPIA)</a>
+                <a class="nav-item" href="insiden.html"><span class="nav-icon">🚨</span> Insiden & Pelanggaran</a>
+                <div class="nav-section-title">Administrasi</div>
+                <a class="nav-item" href="dokumen.html"><span class="nav-icon">📄</span> Dokumen & Kebijakan</a>
+                <a class="nav-item active" href="audit.html"><span class="nav-icon">📋</span> Audit Trail</a>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <div class="user-avatar" id="sidebarUserAvatar">A</div>
+                    <div class="user-meta">
+                        <h4 id="sidebarUserName">Admin PDP</h4><span id="sidebarUserRole">DPO</span>
+                    </div>
+                    <button onclick="logout()"
+                        style="margin-left:auto;background:none;border:none;color:rgba(255,255,255,0.5);cursor:pointer;font-size:18px;">🚪</button>
+                </div>
+            </div>
+        </aside>
+
+        <div class="main-content">
+            <header class="topbar">
+                <div class="topbar-title">
+                    <h2>Audit Trail & Log Aktivitas</h2>
+                    <p>Rekam jejak semua aktivitas sistem PDP · Tidak dapat dihapus · Pasal 18 UU PDP</p>
+                </div>
+                <div class="topbar-actions">
+                    <button class="btn btn-outline btn-sm" onclick="exportLog()">📥 Export CSV</button>
+                    <button class="btn btn-primary btn-sm" onclick="loadAudit()">🔄 Refresh</button>
+                </div>
+            </header>
+
+            <div class="page-content">
+                <div class="alert-strip info" style="margin-bottom:20px;">
+                    🔒 Audit trail ini bersifat <strong>immutable</strong> — catatan tidak dapat diedit atau dihapus.
+                    Setiap aksi sistem, persetujuan consent, pengiriman email, dan penanganan insiden tercatat otomatis.
+                </div>
+
+                <div class="stats-grid" style="grid-template-columns:repeat(5,1fr); margin-bottom:20px;">
+                    <div class="stat-card blue">
+                        <div class="stat-icon blue">📋</div>
+                        <div class="stat-value" id="logTotal">0</div>
+                        <div class="stat-label">Total Log</div>
+                    </div>
+                    <div class="stat-card green">
+                        <div class="stat-icon green">✅</div>
+                        <div class="stat-value" id="logConsent">0</div>
+                        <div class="stat-label">Aktivitas Consent</div>
+                    </div>
+                    <div class="stat-card blue">
+                        <div class="stat-icon blue">👤</div>
+                        <div class="stat-value" id="logDsr">0</div>
+                        <div class="stat-label">Aktivitas DSR</div>
+                    </div>
+                    <div class="stat-card orange">
+                        <div class="stat-icon orange">📧</div>
+                        <div class="stat-value" id="logEmail">0</div>
+                        <div class="stat-label">Email Terkirim</div>
+                    </div>
+                    <div class="stat-card red">
+                        <div class="stat-icon red">🚨</div>
+                        <div class="stat-value" id="logInsiden">0</div>
+                        <div class="stat-label">Insiden</div>
+                    </div>
+                </div>
+
+                <!-- Filters -->
+                <div class="card" style="padding:16px 20px; margin-bottom:16px;">
+                    <div class="filter-row">
+                        <span style="font-weight:600; font-size:13px;">🔍 Filter:</span>
+                        <div class="search-bar" style="flex:1; max-width:300px;">
+                            <span>🔍</span>
+                            <input type="text" id="searchLog" placeholder="Cari deskripsi, user..."
+                                oninput="loadAudit()">
+                        </div>
+                        <select id="filterAction" class="form-control form-select"
+                            style="width:200px; padding:8px 14px; padding-right:32px;" onchange="loadAudit()">
+                            <option value="">Semua Aksi</option>
+                            <option value="LOGIN">Login</option>
+                            <option value="EMAIL">Email Terkirim</option>
+                            <option value="CONSENT">Consent</option>
+                            <option value="DSR">DSR</option>
+                            <option value="INSIDEN">Insiden</option>
+                        </select>
+                        <button class="btn btn-outline btn-sm"
+                            onclick="document.getElementById('searchLog').value=''; document.getElementById('filterAction').value=''; loadAudit();">Reset</button>
+                    </div>
+                </div>
+
+                <div class="card" style="padding:0;">
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Waktu</th>
+                                    <th>Aksi</th>
+                                    <th>Deskripsi</th>
+                                    <th>User</th>
+                                    <th>Role</th>
+                                    <th>IP Address</th>
+                                </tr>
+                            </thead>
+                            <tbody id="auditTable"></tbody>
+                        </table>
+                    </div>
+                    <div
+                        style="padding:14px 20px; border-top:1px solid var(--border); font-size:12px; color:var(--text-muted);">
+                        Menampilkan <strong id="logCount">0</strong> entri log terbaru
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast-container" id="toastContainer"></div>
+    <script src="app.js"></script>
+    <script>
+        function getActionClass(action) {
+            if (!action) return 'other';
+            const a = action.toUpperCase();
+            if (a.includes('LOGIN') || a.includes('LOGOUT')) return 'login';
+            if (a.includes('CONSENT')) return 'consent';
+            if (a.includes('DSR')) return 'dsr';
+            if (a.includes('EMAIL')) return 'email';
+            if (a.includes('INSIDEN')) return 'insiden';
+            if (a.includes('DOC') || a.includes('INV') || a.includes('DPIA')) return 'doc';
+            return 'other';
+        }
+
+        function loadAudit() {
+            const raw = JSON.parse(localStorage.getItem('pdp_audit') || '[]');
+            const q = (document.getElementById('searchLog')?.value || '').toLowerCase();
+            const fa = (document.getElementById('filterAction')?.value || '').toUpperCase();
+
+            document.getElementById('logTotal').textContent = raw.length;
+            document.getElementById('logConsent').textContent = raw.filter(r => r.action?.includes('CONSENT')).length;
+            document.getElementById('logDsr').textContent = raw.filter(r => r.action?.includes('DSR')).length;
+            document.getElementById('logEmail').textContent = raw.filter(r => r.action?.includes('EMAIL')).length;
+            document.getElementById('logInsiden').textContent = raw.filter(r => r.action?.includes('INSIDEN')).length;
+
+            const filtered = raw.filter(r => {
+                const matchQ = !q || (r.desc + r.user + r.email + r.action).toLowerCase().includes(q);
+                const matchA = !fa || (r.action || '').toUpperCase().includes(fa);
+                return matchQ && matchA;
+            });
+
+            document.getElementById('logCount').textContent = filtered.length;
+            document.getElementById('auditTable').innerHTML = filtered.map((r, i) => {
+                const isEmail = (r.action || '').includes('EMAIL');
+                return `<tr class="log-row ${isEmail ? 'email-log-row' : ''}">
+        <td style="color:var(--text-muted);">${i + 1}</td>
+        <td style="white-space:nowrap;">${formatDateTime(r.time)}</td>
+        <td><span class="action-tag ${getActionClass(r.action)}">${r.action || '-'}</span></td>
+        <td style="max-width:300px;">${r.desc || '-'}${r.target ? `<div style="font-size:11px;color:var(--text-muted);">📧 → ${r.target}</div>` : ''}</td>
+        <td><div style="font-weight:600;font-size:12px;">${r.user || '-'}</div><div style="font-size:11px;color:var(--text-muted);">${r.email || ''}</div></td>
+        <td><span class="badge badge-default" style="font-size:10px;">${(r.role || '').toUpperCase()}</span></td>
+        <td style="font-family:monospace; font-size:11px; color:var(--text-muted);">${r.ip || '-'}</td>
+      </tr>`;
+            }).join('') || '<tr><td colspan="7"><div class="empty-state"><div class="empty-icon">📋</div><h4>Tidak ada log yang ditemukan</h4></div></td></tr>';
+        }
+
+        function exportLog() {
+            const data = JSON.parse(localStorage.getItem('pdp_audit') || '[]');
+            const csv = ['No,Waktu,Aksi,Deskripsi,User,Email,Role,IP', ...data.map((r, i) => `${i + 1},"${formatDateTime(r.time)}","${r.action || ''}","${(r.desc || '').replace(/"/g, "'")}","${r.user || ''}","${r.email || ''}","${r.role || ''}","${r.ip || ''}"`)]
+                .join('\n');
+            const a = document.createElement('a');
+            a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+            a.download = `AuditLog_PDP_AtriPasifik_${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+            showToast('Export Berhasil', `${data.length} log diekspor ke CSV`, 'success');
+        }
+
+        document.addEventListener('DOMContentLoaded', () => { requireAuth(); loadAudit(); });
+    </script>
+</body>
+
+</html>

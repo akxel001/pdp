@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manajemen Consent — Sistem PDP PT Atri Pasifik</title>
+    <link rel="stylesheet" href="style-pdp.css">
+    <style>
+        .email-notif-banner {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: linear-gradient(135deg, #EEF2FF, #DBEAFE);
+            border: 1px solid #BFDBFE;
+            border-radius: var(--radius-md);
+            padding: 14px 18px;
+            margin-bottom: 20px;
+        }
+
+        .email-notif-banner .enb-icon {
+            font-size: 24px;
+        }
+
+        .email-notif-banner h4 {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .email-notif-banner p {
+            font-size: 12px;
+            color: #1E40AF;
+            margin-top: 2px;
+        }
+
+        .action-group {
+            display: flex;
+            gap: 6px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app-layout">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    <img src="logo-atri.png" alt="AP"
+                        onerror="this.style.display='none'; this.parentElement.innerHTML='<span style=\'font-size:16px;font-weight:800;color:#1B2B6B\'>AP</span>'">
+                </div>
+                <div class="sidebar-brand">
+                    <h3>Sistem PDP</h3><span>PT Atri Pasifik</span>
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-section-title">Menu Utama</div>
+                <a class="nav-item" href="dashboard.html"><span class="nav-icon">📊</span> Dashboard</a>
+                <a class="nav-item" href="inventaris.html"><span class="nav-icon">🗂️</span> Inventaris Data</a>
+                <a class="nav-item active" href="consent.html"><span class="nav-icon">✅</span> Manajemen Consent</a>
+                <a class="nav-item" href="dsr.html"><span class="nav-icon">👤</span> Hak Subjek Data</a>
+                <a class="nav-item" href="permintaan.html"><span class="nav-icon">📁</span> Permintaan Internal</a>
+                <div class="nav-section-title">Kepatuhan</div>
+                <a class="nav-item" href="dpia.html"><span class="nav-icon">⚠️</span> Penilaian Risiko (DPIA)</a>
+                <a class="nav-item" href="insiden.html"><span class="nav-icon">🚨</span> Insiden & Pelanggaran</a>
+                <div class="nav-section-title">Administrasi</div>
+                <a class="nav-item" href="dokumen.html"><span class="nav-icon">📄</span> Dokumen & Kebijakan</a>
+                <a class="nav-item" href="audit.html"><span class="nav-icon">📋</span> Audit Trail</a>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <div class="user-avatar" id="sidebarUserAvatar">A</div>
+                    <div class="user-meta">
+                        <h4 id="sidebarUserName">Admin PDP</h4><span id="sidebarUserRole">DPO</span>
+                    </div>
+                    <button onclick="logout()"
+                        style="margin-left:auto;background:none;border:none;color:rgba(255,255,255,0.5);cursor:pointer;font-size:18px;">🚪</button>
+                </div>
+            </div>
+        </aside>
+
+        <div class="main-content">
+            <header class="topbar">
+                <div class="topbar-title">
+                    <h2>Manajemen Consent</h2>
+                    <p>Kelola persetujuan pemrosesan data pribadi subjek · Notifikasi email otomatis</p>
+                </div>
+                <div class="topbar-actions">
+                    <div class="search-bar">
+                        <span>🔍</span>
+                        <input type="text" id="searchConsent" placeholder="Cari nama, email, jenis..."
+                            oninput="filterTable('searchConsent','consentTable')">
+                    </div>
+                    <button class="btn btn-primary" onclick="openModal('modalTambahConsent')">+ Tambah Consent</button>
+                </div>
+            </header>
+
+            <div class="page-content">
+                <!-- Email Notif Banner -->
+                <div class="email-notif-banner">
+                    <div class="enb-icon">📧</div>
+                    <div>
+                        <h4>Notifikasi Email Otomatis Aktif</h4>
+                        <p>Setiap persetujuan/penolakan consent akan otomatis mengirim email notifikasi ke subjek data
+                            sesuai Pasal 26 UU PDP No. 27/2022.</p>
+                    </div>
+                </div>
+
+                <!-- Stats -->
+                <div class="stats-grid" style="grid-template-columns:repeat(4,1fr); margin-bottom:20px;">
+                    <div class="stat-card green">
+                        <div class="stat-icon green">✅</div>
+                        <div class="stat-value" id="cntDisetujui">0</div>
+                        <div class="stat-label">Disetujui</div>
+                    </div>
+                    <div class="stat-card orange">
+                        <div class="stat-icon orange">⏳</div>
+                        <div class="stat-value" id="cntMenunggu">0</div>
+                        <div class="stat-label">Menunggu</div>
+                    </div>
+                    <div class="stat-card red">
+                        <div class="stat-icon red">❌</div>
+                        <div class="stat-value" id="cntDicabut">0</div>
+                        <div class="stat-label">Dicabut</div>
+                    </div>
+                    <div class="stat-card blue">
+                        <div class="stat-icon blue">📊</div>
+                        <div class="stat-value" id="cntTotal">0</div>
+                        <div class="stat-label">Total Consent</div>
+                    </div>
+                </div>
+
+                <!-- Tab Nav -->
+                <div class="tab-nav">
+                    <button class="tab-btn active" onclick="filterByStatus('', this)">Semua</button>
+                    <button class="tab-btn" onclick="filterByStatus('DISETUJUI', this)">✅ Disetujui</button>
+                    <button class="tab-btn" onclick="filterByStatus('MENUNGGU', this)">⏳ Menunggu</button>
+                    <button class="tab-btn" onclick="filterByStatus('DICABUT', this)">❌ Dicabut</button>
+                </div>
+
+                <!-- Table -->
+                <div class="card" style="padding:0;">
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Subjek Data</th>
+                                    <th>Jenis & Tujuan</th>
+                                    <th>Dasar Hukum</th>
+                                    <th>Departemen</th>
+                                    <th>Tanggal</th>
+                                    <th>Status</th>
+                                    <th>Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="consentTable"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: Tambah Consent -->
+    <div class="modal-overlay" id="modalTambahConsent">
+        <div class="modal" style="max-width:640px;">
+            <div class="modal-header">
+                <div class="modal-icon info">✅</div>
+                <div>
+                    <div class="modal-title">Tambah Consent Baru</div>
+                    <div class="modal-subtitle">Sesuai Pasal 20–25 UU PDP No. 27/2022</div>
+                </div>
+                <button class="modal-close" onclick="closeModal('modalTambahConsent')">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label class="form-label">Nama Subjek Data <span class="required">*</span></label>
+                        <div class="input-wrapper"><span class="input-icon">👤</span><input type="text" id="c_nama"
+                                class="form-control" placeholder="Nama lengkap"></div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Email Subjek <span class="required">*</span></label>
+                        <div class="input-wrapper"><span class="input-icon">📧</span><input type="email" id="c_email"
+                                class="form-control" placeholder="email@domain.com"></div>
+                    </div>
+                </div>
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label class="form-label">Jenis Consent <span class="required">*</span></label>
+                        <select id="c_jenis" class="form-control form-select no-icon">
+                            <option value="">-- Pilih --</option>
+                            <option>Pemasaran & Promosi</option>
+                            <option>Analitik Data</option>
+                            <option>Profil SDM</option>
+                            <option>Layanan Pelanggan</option>
+                            <option>Pihak Ketiga</option>
+                            <option>Penelitian & Pengembangan</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Dasar Hukum</label>
+                        <select id="c_dasar" class="form-control form-select no-icon">
+                            <option>Persetujuan (Pasal 20)</option>
+                            <option>Kontrak (Pasal 20)</option>
+                            <option>Kewajiban Hukum (Pasal 21)</option>
+                            <option>Kepentingan Sah (Pasal 21)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Tujuan Pemrosesan <span class="required">*</span></label>
+                    <textarea id="c_tujuan" class="form-control no-icon" rows="2"
+                        placeholder="Jelaskan tujuan pemrosesan data..."></textarea>
+                </div>
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label class="form-label">Departemen PIC</label>
+                        <select id="c_dept" class="form-control form-select no-icon">
+                            <option>HR</option>
+                            <option>IT</option>
+                            <option>Marketing</option>
+                            <option>Finance</option>
+                            <option>Legal</option>
+                            <option>CS</option>
+                            <option>Procurement</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Tanggal Kedaluwarsa</label>
+                        <input type="date" id="c_exp" class="form-control no-icon">
+                    </div>
+                </div>
+                <div class="alert-strip info">
+                    📧 Notifikasi email akan otomatis dikirim ke subjek data saat status diubah (Disetujui / Ditolak).
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeModal('modalTambahConsent')">Batal</button>
+                <button class="btn btn-primary" onclick="tambahConsent()">Simpan & Submit</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: Konfirmasi Approve -->
+    <div class="modal-overlay" id="modalApprove">
+        <div class="modal" style="max-width:480px;">
+            <div class="modal-header">
+                <div class="modal-icon success">✅</div>
+                <div>
+                    <div class="modal-title">Setujui Consent</div>
+                    <div class="modal-subtitle">Notifikasi email akan dikirim ke subjek data</div>
+                </div>
+                <button class="modal-close" onclick="closeModal('modalApprove')">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="alert-strip success">✅ Anda akan menyetujui consent <strong id="approveConsentId"></strong>
+                </div>
+                <div class="form-group" style="margin-top:12px;">
+                    <label class="form-label">Catatan Persetujuan (opsional)</label>
+                    <textarea id="approveNote" class="form-control no-icon" rows="2"
+                        placeholder="Tambahkan catatan jika perlu..."></textarea>
+                </div>
+                <div class="alert-strip info">📧 Email konfirmasi akan otomatis dikirim ke: <strong
+                        id="approveEmail"></strong></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeModal('modalApprove')">Batal</button>
+                <button class="btn btn-success" onclick="confirmApprove()">✅ Setujui & Kirim Email</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: Konfirmasi Tolak -->
+    <div class="modal-overlay" id="modalTolak">
+        <div class="modal" style="max-width:480px;">
+            <div class="modal-header">
+                <div class="modal-icon danger">❌</div>
+                <div>
+                    <div class="modal-title">Tolak / Cabut Consent</div>
+                    <div class="modal-subtitle">Notifikasi email akan dikirim ke subjek data</div>
+                </div>
+                <button class="modal-close" onclick="closeModal('modalTolak')">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="alert-strip danger">❌ Anda akan menolak/mencabut consent <strong
+                        id="tolakConsentId"></strong></div>
+                <div class="form-group" style="margin-top:12px;">
+                    <label class="form-label">Alasan Penolakan <span class="required">*</span></label>
+                    <textarea id="tolakAlasan" class="form-control no-icon" rows="3"
+                        placeholder="Jelaskan alasan penolakan/pencabutan..."></textarea>
+                </div>
+                <div class="alert-strip info">📧 Email penolakan akan dikirim ke: <strong id="tolakEmail"></strong>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeModal('modalTolak')">Batal</button>
+                <button class="btn btn-danger" onclick="confirmTolak()">❌ Tolak & Kirim Email</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: Detail -->
+    <div class="modal-overlay" id="modalDetail">
+        <div class="modal" style="max-width:560px;">
+            <div class="modal-header">
+                <div class="modal-icon info">📋</div>
+                <div>
+                    <div class="modal-title">Detail Consent</div>
+                    <div class="modal-subtitle" id="detailConsentId"></div>
+                </div>
+                <button class="modal-close" onclick="closeModal('modalDetail')">✕</button>
+            </div>
+            <div class="modal-body" id="modalDetailBody"></div>
+            <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('modalDetail')">Tutup</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast-container" id="toastContainer"></div>
+    <script src="app.js"></script>
+    <script>
+        let currentConsentId = null;
+        let activeFilter = '';
+
+        function renderTable() {
+            const data = JSON.parse(localStorage.getItem('pdp_consents') || '[]');
+            const tbody = document.getElementById('consentTable');
+            const filtered = activeFilter ? data.filter(d => d.status === activeFilter) : data;
+
+            document.getElementById('cntDisetujui').textContent = data.filter(d => d.status === 'DISETUJUI').length;
+            document.getElementById('cntMenunggu').textContent = data.filter(d => d.status === 'MENUNGGU').length;
+            document.getElementById('cntDicabut').textContent = data.filter(d => d.status === 'DICABUT').length;
+            document.getElementById('cntTotal').textContent = data.length;
+
+            tbody.innerHTML = filtered.map(c => `
+      <tr>
+        <td><code style="font-size:11px;background:var(--bg);padding:2px 6px;border-radius:4px;">${c.id}</code></td>
+        <td>
+          <div class="td-name">${c.subjek}</div>
+          <div class="td-meta">📧 ${c.email}</div>
+        </td>
+        <td>
+          <div class="td-name">${c.jenis}</div>
+          <div class="td-meta" style="max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${c.tujuan}</div>
+        </td>
+        <td><div class="td-meta">${c.dasar}</div></td>
+        <td><span class="badge badge-default">${c.dept}</span></td>
+        <td>
+          <div class="td-meta">${formatDate(c.tanggal)}</div>
+          <div class="td-meta">s/d ${formatDate(c.kedaluwarsa)}</div>
+        </td>
+        <td>${statusBadge(c.status)}</td>
+        <td>
+          <div class="action-group">
+            <button class="btn btn-outline btn-sm" onclick="showDetail('${c.id}')" title="Detail">🔍</button>
+            ${c.status === 'MENUNGGU' ? `
+              <button class="btn btn-success btn-sm" onclick="openApprove('${c.id}')" title="Setujui">✅</button>
+              <button class="btn btn-danger btn-sm" onclick="openTolak('${c.id}')" title="Tolak">❌</button>
+            ` : ''}
+            ${c.status === 'DISETUJUI' ? `<button class="btn btn-warning btn-sm" onclick="openTolak('${c.id}')" title="Cabut">🔄</button>` : ''}
+          </div>
+        </td>
+      </tr>
+    `).join('') || `<tr><td colspan="8"><div class="empty-state"><div class="empty-icon">📋</div><h4>Belum ada data consent</h4><p>Klik "+ Tambah Consent" untuk menambahkan</p></div></td></tr>`;
+        }
+
+        function filterByStatus(status, btn) {
+            activeFilter = status;
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            renderTable();
+        }
+
+        function tambahConsent() {
+            const nama = document.getElementById('c_nama').value.trim();
+            const email = document.getElementById('c_email').value.trim();
+            const jenis = document.getElementById('c_jenis').value;
+            const tujuan = document.getElementById('c_tujuan').value.trim();
+            if (!nama || !email || !jenis || !tujuan) { showToast('Form Tidak Lengkap', 'Isi semua field wajib terlebih dahulu', 'error'); return; }
+
+            const data = JSON.parse(localStorage.getItem('pdp_consents') || '[]');
+            const today = new Date().toISOString().split('T')[0];
+            const exp = document.getElementById('c_exp').value || new Date(Date.now() + 365 * 86400000).toISOString().split('T')[0];
+            const newConsent = {
+                id: generateId('CNS'), subjek: nama, email,
+                jenis, tujuan,
+                dasar: document.getElementById('c_dasar').value,
+                dept: document.getElementById('c_dept').value,
+                status: 'MENUNGGU', tanggal: today, kedaluwarsa: exp
+            };
+            data.unshift(newConsent);
+            localStorage.setItem('pdp_consents', JSON.stringify(data));
+            addAuditLog('CONSENT_CREATE', `Consent baru ${newConsent.id} dibuat untuk ${nama} (${email})`);
+            closeModal('modalTambahConsent');
+            renderTable();
+            showToast('Consent Ditambahkan', `${newConsent.id} untuk ${nama} berhasil disimpan`, 'success');
+        }
+
+        function openApprove(id) {
+            const data = JSON.parse(localStorage.getItem('pdp_consents') || '[]');
+            const c = data.find(c => c.id === id);
+            currentConsentId = id;
+            document.getElementById('approveConsentId').textContent = id;
+            document.getElementById('approveEmail').textContent = c.email;
+            document.getElementById('approveNote').value = '';
+            openModal('modalApprove');
+        }
+
+        function confirmApprove() {
+            const data = JSON.parse(localStorage.getItem('pdp_consents') || '[]');
+            const c = data.find(c => c.id === currentConsentId);
+            if (!c) return;
+            c.status = 'DISETUJUI';
+            localStorage.setItem('pdp_consents', JSON.stringify(data));
+            addAuditLog('CONSENT_APPROVE', `Consent ${c.id} disetujui untuk ${c.subjek}`);
+            closeModal('modalApprove');
+            renderTable();
+
+            // 📧 KIRIM EMAIL NOTIFIKASI KE SUBJEK DATA
+            EmailNotif.send({
+                to: c.email, toName: c.subjek,
+                type: 'consent', requestId: c.id,
+                requestType: c.jenis,
+                status: 'DISETUJUI',
+                reason: document.getElementById('approveNote').value || 'Consent Anda telah diverifikasi dan disetujui.'
+            });
+        }
+
+        function openTolak(id) {
+            const data = JSON.parse(localStorage.getItem('pdp_consents') || '[]');
+            const c = data.find(c => c.id === id);
+            currentConsentId = id;
+            document.getElementById('tolakConsentId').textContent = id;
+            document.getElementById('tolakEmail').textContent = c.email;
+            document.getElementById('tolakAlasan').value = '';
+            openModal('modalTolak');
+        }
+
+        function confirmTolak() {
+            const alasan = document.getElementById('tolakAlasan').value.trim();
+            if (!alasan) { showToast('Alasan Diperlukan', 'Tolong isi alasan penolakan', 'error'); return; }
+            const data = JSON.parse(localStorage.getItem('pdp_consents') || '[]');
+            const c = data.find(c => c.id === currentConsentId);
+            if (!c) return;
+            c.status = 'DICABUT';
+            localStorage.setItem('pdp_consents', JSON.stringify(data));
+            addAuditLog('CONSENT_REJECT', `Consent ${c.id} ditolak/dicabut — alasan: ${alasan}`);
+            closeModal('modalTolak');
+            renderTable();
+
+            // 📧 KIRIM EMAIL NOTIFIKASI KE SUBJEK DATA
+            EmailNotif.send({
+                to: c.email, toName: c.subjek,
+                type: 'consent', requestId: c.id,
+                requestType: c.jenis,
+                status: 'DITOLAK',
+                reason: alasan
+            });
+        }
+
+        function showDetail(id) {
+            const data = JSON.parse(localStorage.getItem('pdp_consents') || '[]');
+            const c = data.find(c => c.id === id);
+            if (!c) return;
+            document.getElementById('detailConsentId').textContent = c.id;
+            document.getElementById('modalDetailBody').innerHTML = `
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+        <div><div class="text-muted">Subjek Data</div><div class="font-bold" style="margin-top:3px;">${c.subjek}</div></div>
+        <div><div class="text-muted">Email</div><div class="font-bold" style="margin-top:3px;">${c.email}</div></div>
+        <div><div class="text-muted">Jenis Consent</div><div class="font-bold" style="margin-top:3px;">${c.jenis}</div></div>
+        <div><div class="text-muted">Dasar Hukum</div><div class="font-bold" style="margin-top:3px;">${c.dasar}</div></div>
+        <div><div class="text-muted">Departemen</div><div style="margin-top:3px;"><span class="badge badge-default">${c.dept}</span></div></div>
+        <div><div class="text-muted">Status</div><div style="margin-top:3px;">${statusBadge(c.status)}</div></div>
+        <div><div class="text-muted">Tanggal Mulai</div><div style="margin-top:3px;">${formatDate(c.tanggal)}</div></div>
+        <div><div class="text-muted">Kedaluwarsa</div><div style="margin-top:3px;">${formatDate(c.kedaluwarsa)}</div></div>
+      </div>
+      <hr class="divider">
+      <div class="text-muted">Tujuan Pemrosesan</div>
+      <div style="margin-top:6px; padding:12px; background:var(--bg); border-radius:8px; font-size:13px;">${c.tujuan}</div>
+    `;
+            openModal('modalDetail');
+        }
+
+        document.addEventListener('DOMContentLoaded', () => { requireAuth(); renderTable(); });
+    </script>
+</body>
+
+</html>

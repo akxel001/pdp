@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DPIA — Sistem PDP PT Atri Pasifik</title>
+    <link rel="stylesheet" href="style-pdp.css">
+    <style>
+        .dpia-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            transition: var(--transition);
+        }
+
+        .dpia-card:hover {
+            box-shadow: var(--shadow-md);
+        }
+
+        .dpia-score {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: 800;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            flex-shrink: 0;
+        }
+
+        .dpia-score.low {
+            background: var(--success-bg);
+            color: #065F46;
+        }
+
+        .dpia-score.mid {
+            background: var(--warning-bg);
+            color: #92400E;
+        }
+
+        .dpia-score.high {
+            background: var(--danger-bg);
+            color: #991B1B;
+        }
+
+        .skor-range {
+            display: flex;
+            gap: 4px;
+            margin: 8px 0;
+        }
+
+        .skor-block {
+            height: 6px;
+            flex: 1;
+            border-radius: 3px;
+            background: var(--border);
+        }
+
+        .skor-block.filled-green {
+            background: var(--success);
+        }
+
+        .skor-block.filled-orange {
+            background: var(--warning);
+        }
+
+        .skor-block.filled-red {
+            background: var(--danger);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app-layout">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo"><img src="logo-atri.png" alt="AP"
+                        onerror="this.style.display='none'; this.parentElement.innerHTML='<span style=\'font-size:16px;font-weight:800;color:#1B2B6B\'>AP</span>'">
+                </div>
+                <div class="sidebar-brand">
+                    <h3>Sistem PDP</h3><span>PT Atri Pasifik</span>
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-section-title">Menu Utama</div>
+                <a class="nav-item" href="dashboard.html"><span class="nav-icon">📊</span> Dashboard</a>
+                <a class="nav-item" href="inventaris.html"><span class="nav-icon">🗂️</span> Inventaris Data</a>
+                <a class="nav-item" href="consent.html"><span class="nav-icon">✅</span> Manajemen Consent</a>
+                <a class="nav-item" href="dsr.html"><span class="nav-icon">👤</span> Hak Subjek Data</a>
+                <a class="nav-item" href="permintaan.html"><span class="nav-icon">📁</span> Permintaan Internal</a>
+                <div class="nav-section-title">Kepatuhan</div>
+                <a class="nav-item active" href="dpia.html"><span class="nav-icon">⚠️</span> Penilaian Risiko (DPIA)</a>
+                <a class="nav-item" href="insiden.html"><span class="nav-icon">🚨</span> Insiden & Pelanggaran</a>
+                <div class="nav-section-title">Administrasi</div>
+                <a class="nav-item" href="dokumen.html"><span class="nav-icon">📄</span> Dokumen & Kebijakan</a>
+                <a class="nav-item" href="audit.html"><span class="nav-icon">📋</span> Audit Trail</a>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <div class="user-avatar" id="sidebarUserAvatar">A</div>
+                    <div class="user-meta">
+                        <h4 id="sidebarUserName">Admin PDP</h4><span id="sidebarUserRole">DPO</span>
+                    </div>
+                    <button onclick="logout()"
+                        style="margin-left:auto;background:none;border:none;color:rgba(255,255,255,0.5);cursor:pointer;font-size:18px;">🚪</button>
+                </div>
+            </div>
+        </aside>
+
+        <div class="main-content">
+            <header class="topbar">
+                <div class="topbar-title">
+                    <h2>Penilaian Dampak Privasi (DPIA)</h2>
+                    <p>Data Protection Impact Assessment · Pasal 34 UU PDP No. 27/2022</p>
+                </div>
+                <div class="topbar-actions">
+                    <button class="btn btn-primary" onclick="openModal('modalTambahDpia')">+ DPIA Baru</button>
+                </div>
+            </header>
+
+            <div class="page-content">
+                <div class="alert-strip warning" style="margin-bottom:20px;">
+                    ⚠️ DPIA wajib dilakukan sebelum memulai pemrosesan data yang berpotensi menimbulkan risiko tinggi
+                    terhadap hak subjek data (<strong>Pasal 34 UU PDP</strong>).
+                </div>
+
+                <div class="stats-grid" style="grid-template-columns:repeat(3,1fr); margin-bottom:24px;">
+                    <div class="stat-card red">
+                        <div class="stat-icon red">🔴</div>
+                        <div class="stat-value" id="dpiaHigh">0</div>
+                        <div class="stat-label">Risiko Tinggi</div>
+                    </div>
+                    <div class="stat-card orange">
+                        <div class="stat-icon orange">🟡</div>
+                        <div class="stat-value" id="dpiaMid">0</div>
+                        <div class="stat-label">Risiko Sedang</div>
+                    </div>
+                    <div class="stat-card green">
+                        <div class="stat-icon green">🟢</div>
+                        <div class="stat-value" id="dpiaLow">0</div>
+                        <div class="stat-label">Risiko Rendah</div>
+                    </div>
+                </div>
+
+                <div id="dpiaGrid" style="display:grid; grid-template-columns:repeat(2,1fr); gap:20px;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: Tambah DPIA -->
+    <div class="modal-overlay" id="modalTambahDpia">
+        <div class="modal" style="max-width:640px;">
+            <div class="modal-header">
+                <div class="modal-icon warning">⚠️</div>
+                <div>
+                    <div class="modal-title">DPIA Baru</div>
+                    <div class="modal-subtitle">Data Protection Impact Assessment</div>
+                </div>
+                <button class="modal-close" onclick="closeModal('modalTambahDpia')">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group"><label class="form-label">Nama Kegiatan/Proyek <span
+                            class="required">*</span></label><input type="text" id="dp_nama"
+                        class="form-control no-icon" placeholder="Nama proyek atau kegiatan yang diases"></div>
+                <div class="form-group"><label class="form-label">Deskripsi</label><textarea id="dp_desc"
+                        class="form-control no-icon" rows="2"
+                        placeholder="Jelaskan kegiatan pemrosesan data..."></textarea></div>
+                <div class="grid-2">
+                    <div class="form-group"><label class="form-label">Pemilik/PIC</label><input type="text"
+                            id="dp_pemilik" class="form-control no-icon" placeholder="cth: IT & Marketing"></div>
+                    <div class="form-group"><label class="form-label">Level Risiko</label>
+                        <select id="dp_level" class="form-control form-select no-icon">
+                            <option value="RENDAH">Rendah (Skor &lt; 60)</option>
+                            <option value="SEDANG">Sedang (Skor 60–79)</option>
+                            <option value="TINGGI">Tinggi (Skor ≥ 80)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="grid-2">
+                    <div class="form-group"><label class="form-label">Tanggal Mulai</label><input type="date"
+                            id="dp_mulai" class="form-control no-icon"></div>
+                    <div class="form-group"><label class="form-label">Target Selesai</label><input type="date"
+                            id="dp_selesai" class="form-control no-icon"></div>
+                </div>
+                <div class="form-group"><label class="form-label">Skor Risiko (0–100)</label><input type="number"
+                        id="dp_skor" class="form-control no-icon" min="0" max="100" value="50"></div>
+                <div class="form-group"><label class="form-label">Rekomendasi Mitigasi</label><textarea id="dp_rek"
+                        class="form-control no-icon" rows="2"
+                        placeholder="Langkah-langkah mitigasi risiko..."></textarea></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeModal('modalTambahDpia')">Batal</button>
+                <button class="btn btn-primary" onclick="tambahDpia()">Simpan DPIA</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast-container" id="toastContainer"></div>
+    <script src="app.js"></script>
+    <script>
+        function getSkorClass(skor) { return skor >= 80 ? 'high' : skor >= 60 ? 'mid' : 'low'; }
+        function getSkorLabel(skor) { return skor >= 80 ? '🔴 Tinggi' : skor >= 60 ? '🟡 Sedang' : '🟢 Rendah'; }
+
+        function renderDpia() {
+            const data = JSON.parse(localStorage.getItem('pdp_dpia') || '[]');
+            document.getElementById('dpiaHigh').textContent = data.filter(d => d.level === 'TINGGI').length;
+            document.getElementById('dpiaMid').textContent = data.filter(d => d.level === 'SEDANG').length;
+            document.getElementById('dpiaLow').textContent = data.filter(d => d.level === 'RENDAH').length;
+
+            document.getElementById('dpiaGrid').innerHTML = data.map(d => {
+                const sc = getSkorClass(d.skor);
+                const bloks = Array.from({ length: 10 }, (_, i) => {
+                    const filled = i < Math.floor(d.skor / 10);
+                    const cls = d.skor >= 80 ? 'filled-red' : d.skor >= 60 ? 'filled-orange' : 'filled-green';
+                    return `<div class="skor-block ${filled ? cls : ''}"></div>`;
+                }).join('');
+                return `
+        <div class="dpia-card">
+          <div style="display:flex; align-items:center; gap:16px; margin-bottom:14px;">
+            <div class="dpia-score ${sc}">${d.skor}</div>
+            <div style="flex:1;">
+              <div style="font-weight:700; font-size:15px;">${d.nama}</div>
+              <div style="font-size:12px; color:var(--text-muted); margin-top:2px;">${d.pemilik} · ${statusBadge(d.status)}</div>
+            </div>
+            <div>${statusBadge(d.level)}</div>
+          </div>
+          <div class="skor-range">${bloks}</div>
+          <div style="font-size:12px; color:var(--text-secondary); margin-top:12px;">${d.deskripsi}</div>
+          <hr class="divider" style="margin:12px 0;">
+          <div style="display:flex; gap:16px; font-size:12px; color:var(--text-muted);">
+            <span>📅 Mulai: ${formatDate(d.tglMulai)}</span>
+            <span>🏁 Target: ${d.tglSelesai ? formatDate(d.tglSelesai) : 'Belum ditentukan'}</span>
+          </div>
+          ${d.rekomendasi ? `<div style="margin-top:10px; padding:10px; background:var(--bg); border-radius:8px; font-size:12px;"><strong>💡 Rekomendasi:</strong> ${d.rekomendasi}</div>` : ''}
+        </div>
+      `;
+            }).join('') || '<div class="empty-state col-span-2"><div class="empty-icon">⚠️</div><h4>Belum ada DPIA terdaftar</h4></div>';
+        }
+
+        function tambahDpia() {
+            const nama = document.getElementById('dp_nama').value.trim();
+            if (!nama) { showToast('Form Tidak Lengkap', 'Isi nama kegiatan', 'error'); return; }
+            const data = JSON.parse(localStorage.getItem('pdp_dpia') || '[]');
+            const d = {
+                id: generateId('DPA'), nama, pemilik: document.getElementById('dp_pemilik').value || '-',
+                deskripsi: document.getElementById('dp_desc').value || '-',
+                level: document.getElementById('dp_level').value,
+                skor: parseInt(document.getElementById('dp_skor').value) || 50,
+                status: 'RANCANGAN',
+                tglMulai: document.getElementById('dp_mulai').value || new Date().toISOString().split('T')[0],
+                tglSelesai: document.getElementById('dp_selesai').value || null,
+                rekomendasi: document.getElementById('dp_rek').value || ''
+            };
+            data.unshift(d);
+            localStorage.setItem('pdp_dpia', JSON.stringify(data));
+            addAuditLog('DPIA_CREATE', `DPIA baru ${d.id} (${nama}) — Risiko: ${d.level}`);
+            closeModal('modalTambahDpia');
+            renderDpia();
+            showToast('DPIA Disimpan', `${d.id} berhasil ditambahkan`, 'success');
+        }
+
+        document.addEventListener('DOMContentLoaded', () => { requireAuth(); renderDpia(); });
+    </script>
+</body>
+
+</html>

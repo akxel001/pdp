@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventaris Data — Sistem PDP PT Atri Pasifik</title>
+    <link rel="stylesheet" href="style-pdp.css">
+</head>
+
+<body>
+    <div class="app-layout">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo"><img src="logo-atri.png" alt="AP"
+                        onerror="this.style.display='none'; this.parentElement.innerHTML='<span style=\'font-size:16px;font-weight:800;color:#1B2B6B\'>AP</span>'">
+                </div>
+                <div class="sidebar-brand">
+                    <h3>Sistem PDP</h3><span>PT Atri Pasifik</span>
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-section-title">Menu Utama</div>
+                <a class="nav-item" href="dashboard.html"><span class="nav-icon">📊</span> Dashboard</a>
+                <a class="nav-item active" href="inventaris.html"><span class="nav-icon">🗂️</span> Inventaris Data</a>
+                <a class="nav-item" href="consent.html"><span class="nav-icon">✅</span> Manajemen Consent</a>
+                <a class="nav-item" href="dsr.html"><span class="nav-icon">👤</span> Hak Subjek Data</a>
+                <a class="nav-item" href="permintaan.html"><span class="nav-icon">📁</span> Permintaan Internal</a>
+                <div class="nav-section-title">Kepatuhan</div>
+                <a class="nav-item" href="dpia.html"><span class="nav-icon">⚠️</span> Penilaian Risiko (DPIA)</a>
+                <a class="nav-item" href="insiden.html"><span class="nav-icon">🚨</span> Insiden & Pelanggaran</a>
+                <div class="nav-section-title">Administrasi</div>
+                <a class="nav-item" href="dokumen.html"><span class="nav-icon">📄</span> Dokumen & Kebijakan</a>
+                <a class="nav-item" href="audit.html"><span class="nav-icon">📋</span> Audit Trail</a>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <div class="user-avatar" id="sidebarUserAvatar">A</div>
+                    <div class="user-meta">
+                        <h4 id="sidebarUserName">Admin PDP</h4><span id="sidebarUserRole">DPO</span>
+                    </div>
+                    <button onclick="logout()"
+                        style="margin-left:auto;background:none;border:none;color:rgba(255,255,255,0.5);cursor:pointer;font-size:18px;">🚪</button>
+                </div>
+            </div>
+        </aside>
+
+        <div class="main-content">
+            <header class="topbar">
+                <div class="topbar-title">
+                    <h2>Inventaris & Pemetaan Data</h2>
+                    <p>Registri data pribadi yang dikelola PT Atri Pasifik · Pasal 3 UU PDP No. 27/2022</p>
+                </div>
+                <div class="topbar-actions">
+                    <div class="search-bar">
+                        <span>🔍</span>
+                        <input type="text" id="searchInv" placeholder="Cari nama, kategori...">
+                    </div>
+                    <button class="btn btn-primary" onclick="openModal('modalTambahInv')">+ Tambah Data</button>
+                </div>
+            </header>
+
+            <div class="page-content">
+                <div class="stats-grid" style="grid-template-columns:repeat(4,1fr); margin-bottom:20px;">
+                    <div class="stat-card blue">
+                        <div class="stat-icon blue">🗂️</div>
+                        <div class="stat-value" id="invTotal">0</div>
+                        <div class="stat-label">Total Kategori</div>
+                    </div>
+                    <div class="stat-card red">
+                        <div class="stat-icon red">🔒</div>
+                        <div class="stat-value" id="invSensitif">0</div>
+                        <div class="stat-label">Data Sensitif</div>
+                    </div>
+                    <div class="stat-card green">
+                        <div class="stat-icon green">🛡️</div>
+                        <div class="stat-value" id="invEnkripsi">0</div>
+                        <div class="stat-label">Terenkripsi</div>
+                    </div>
+                    <div class="stat-card orange">
+                        <div class="stat-icon orange">🌐</div>
+                        <div class="stat-value" id="invPihakKetiga">0</div>
+                        <div class="stat-label">Pihak Ketiga</div>
+                    </div>
+                </div>
+
+                <div class="card" style="padding:0;">
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Nama Data</th>
+                                    <th>Kategori</th>
+                                    <th>Jenis Data</th>
+                                    <th>Pemilik</th>
+                                    <th>Penyimpanan</th>
+                                    <th>Retensi</th>
+                                    <th>Sensitif</th>
+                                    <th>Enkripsi</th>
+                                    <th>Risiko</th>
+                                </tr>
+                            </thead>
+                            <tbody id="invTable"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: Tambah Inventaris -->
+    <div class="modal-overlay" id="modalTambahInv">
+        <div class="modal" style="max-width:680px;">
+            <div class="modal-header">
+                <div class="modal-icon info">🗂️</div>
+                <div>
+                    <div class="modal-title">Tambah Inventaris Data</div>
+                    <div class="modal-subtitle">Registrasi kategori data pribadi baru</div>
+                </div>
+                <button class="modal-close" onclick="closeModal('modalTambahInv')">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label class="form-label">Nama Data <span class="required">*</span></label>
+                        <input type="text" id="i_nama" class="form-control no-icon" placeholder="Nama kategori data">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Kategori <span class="required">*</span></label>
+                        <select id="i_kat" class="form-control form-select no-icon">
+                            <option>SDM</option>
+                            <option>Komersial</option>
+                            <option>Keuangan</option>
+                            <option>IT</option>
+                            <option>Operasional</option>
+                            <option>Legal</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Jenis Data yang Dikumpulkan <span class="required">*</span></label>
+                    <input type="text" id="i_jenis" class="form-control no-icon"
+                        placeholder="cth: Nama, NIK, Email, Alamat...">
+                </div>
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label class="form-label">Pemilik/PIC</label>
+                        <select id="i_pemilik" class="form-control form-select no-icon">
+                            <option>HR</option>
+                            <option>IT</option>
+                            <option>Marketing</option>
+                            <option>Finance</option>
+                            <option>Legal</option>
+                            <option>GA</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Media Penyimpanan <span class="required">*</span></label>
+                        <input type="text" id="i_simpan" class="form-control no-icon"
+                            placeholder="cth: HRIS (On-premise), Cloud AWS...">
+                    </div>
+                </div>
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label class="form-label">Periode Retensi</label>
+                        <input type="text" id="i_retensi" class="form-control no-icon"
+                            placeholder="cth: 5 tahun setelah resign">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Dasar Hukum Pemrosesan</label>
+                        <select id="i_dasar" class="form-control form-select no-icon">
+                            <option>Persetujuan</option>
+                            <option>Kontrak Kerja</option>
+                            <option>Kewajiban Hukum</option>
+                            <option>Kepentingan Sah</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label class="form-label">Data Sensitif?</label>
+                        <select id="i_sensitif" class="form-control form-select no-icon">
+                            <option value="TIDAK">Tidak</option>
+                            <option value="YA">Ya (Pasal 4 UU PDP)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Enkripsi Aktif?</label>
+                        <select id="i_enkripsi" class="form-control form-select no-icon">
+                            <option value="YA">Ya</option>
+                            <option value="TIDAK">Tidak</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label class="form-label">Transfer ke Pihak Ketiga?</label>
+                        <select id="i_pihak" class="form-control form-select no-icon">
+                            <option value="TIDAK">Tidak</option>
+                            <option value="YA">Ya (DPA diperlukan)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Level Risiko</label>
+                        <select id="i_risiko" class="form-control form-select no-icon">
+                            <option value="RENDAH">Rendah</option>
+                            <option value="SEDANG">Sedang</option>
+                            <option value="TINGGI">Tinggi</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeModal('modalTambahInv')">Batal</button>
+                <button class="btn btn-primary" onclick="tambahInv()">Simpan</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast-container" id="toastContainer"></div>
+    <script src="app.js"></script>
+    <script>
+        function renderInv() {
+            const data = JSON.parse(localStorage.getItem('pdp_inventaris') || '[]');
+            document.getElementById('invTotal').textContent = data.length;
+            document.getElementById('invSensitif').textContent = data.filter(d => d.sensitif === 'YA').length;
+            document.getElementById('invEnkripsi').textContent = data.filter(d => d.enkripsi === 'YA').length;
+            document.getElementById('invPihakKetiga').textContent = data.filter(d => d.pihakKetiga === 'YA').length;
+
+            document.getElementById('invTable').innerHTML = data.map(d => `
+      <tr>
+        <td><code style="font-size:11px;background:var(--bg);padding:2px 6px;border-radius:4px;">${d.id}</code></td>
+        <td><div class="td-name">${d.nama}</div><div class="td-meta">${d.subKategori || ''}</div></td>
+        <td><span class="badge badge-default">${d.kategori}</span></td>
+        <td style="max-width:150px;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${d.jenis}">${d.jenis}</td>
+        <td><span class="badge badge-primary">${d.pemilik}</span></td>
+        <td style="font-size:12px;">${d.penyimpanan}</td>
+        <td style="font-size:12px;">${d.retensi}</td>
+        <td>${d.sensitif === 'YA' ? '<span class="badge badge-danger">🔒 Sensitif</span>' : '<span class="badge badge-default">Tidak</span>'}</td>
+        <td>${d.enkripsi === 'YA' ? '<span class="badge badge-success">✅ Aktif</span>' : '<span class="badge badge-danger">❌ Tidak</span>'}</td>
+        <td>${statusBadge(d.risiko)}</td>
+      </tr>
+    `).join('') || `<tr><td colspan="10"><div class="empty-state"><div class="empty-icon">🗂️</div><h4>Belum ada data inventaris</h4></div></td></tr>`;
+        }
+
+        function tambahInv() {
+            const nama = document.getElementById('i_nama').value.trim();
+            const jenis = document.getElementById('i_jenis').value.trim();
+            const simpan = document.getElementById('i_simpan').value.trim();
+            if (!nama || !jenis || !simpan) { showToast('Form Tidak Lengkap', 'Isi semua field wajib', 'error'); return; }
+            const data = JSON.parse(localStorage.getItem('pdp_inventaris') || '[]');
+            const newItem = {
+                id: 'INV-' + String(data.length + 1).padStart(3, '0'),
+                nama, kategori: document.getElementById('i_kat').value,
+                jenis, pemilik: document.getElementById('i_pemilik').value,
+                penyimpanan: simpan, retensi: document.getElementById('i_retensi').value || '-',
+                sensitif: document.getElementById('i_sensitif').value,
+                enkripsi: document.getElementById('i_enkripsi').value,
+                pihakKetiga: document.getElementById('i_pihak').value,
+                dasar: document.getElementById('i_dasar').value,
+                risiko: document.getElementById('i_risiko').value
+            };
+            data.unshift(newItem);
+            localStorage.setItem('pdp_inventaris', JSON.stringify(data));
+            addAuditLog('INV_ADD', `Inventaris baru ${newItem.id} (${nama}) ditambahkan`);
+            closeModal('modalTambahInv');
+            renderInv();
+            showToast('Data Disimpan', `Inventaris ${newItem.id} berhasil ditambahkan`, 'success');
+        }
+
+        document.addEventListener('DOMContentLoaded', () => { requireAuth(); renderInv(); });
+    </script>
+</body>
+
+</html>

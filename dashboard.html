@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard — Sistem PDP PT Atri Pasifik</title>
+    <link rel="stylesheet" href="style-pdp.css">
+    <style>
+        .compliance-widget {
+            padding: 20px;
+        }
+
+        .compliance-items {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .compliance-item label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
+
+        .qa-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 18px 14px;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+            text-decoration: none;
+        }
+
+        .qa-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-md);
+            border-color: var(--primary);
+        }
+
+        .qa-card .qa-icon {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .qa-card h4 {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .qa-card p {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 3px;
+        }
+
+        .activity-item {
+            display: flex;
+            gap: 12px;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border);
+            align-items: flex-start;
+        }
+
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+
+        .activity-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            margin-top: 5px;
+        }
+
+        .activity-dot.green {
+            background: var(--success);
+        }
+
+        .activity-dot.blue {
+            background: var(--info);
+        }
+
+        .activity-dot.red {
+            background: var(--danger);
+        }
+
+        .activity-dot.orange {
+            background: var(--warning);
+        }
+
+        .activity-text h5 {
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .activity-text p {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .deadline-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .deadline-item:last-child {
+            border-bottom: none;
+        }
+
+        .deadline-days {
+            font-size: 22px;
+            font-weight: 800;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            min-width: 44px;
+        }
+
+        .deadline-days.urgent {
+            color: var(--danger);
+        }
+
+        .deadline-days.warn {
+            color: var(--warning);
+        }
+
+        .deadline-days.ok {
+            color: var(--success);
+        }
+
+        .deadline-meta h5 {
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .deadline-meta p {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app-layout">
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    <img src="logo-atri.png" alt="AP"
+                        onerror="this.style.display='none'; this.parentElement.innerHTML='<span style=\'font-size:16px;font-weight:800;color:#1B2B6B\'>AP</span>'">
+                </div>
+                <div class="sidebar-brand">
+                    <h3>Sistem PDP</h3>
+                    <span>PT Atri Pasifik</span>
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-section-title">Menu Utama</div>
+                <a class="nav-item active" href="dashboard.html"><span class="nav-icon">📊</span> Dashboard</a>
+                <a class="nav-item" href="inventaris.html"><span class="nav-icon">🗂️</span> Inventaris Data</a>
+                <a class="nav-item" href="consent.html"><span class="nav-icon">✅</span> Manajemen Consent <span
+                        class="nav-badge">2</span></a>
+                <a class="nav-item" href="dsr.html"><span class="nav-icon">👤</span> Hak Subjek Data <span
+                        class="nav-badge">2</span></a>
+                <a class="nav-item" href="permintaan.html"><span class="nav-icon">📁</span> Permintaan Internal</a>
+                <div class="nav-section-title">Kepatuhan</div>
+                <a class="nav-item" href="dpia.html"><span class="nav-icon">⚠️</span> Penilaian Risiko (DPIA)</a>
+                <a class="nav-item" href="insiden.html"><span class="nav-icon">🚨</span> Insiden & Pelanggaran</a>
+                <div class="nav-section-title">Administrasi</div>
+                <a class="nav-item" href="dokumen.html"><span class="nav-icon">📄</span> Dokumen & Kebijakan</a>
+                <a class="nav-item" href="audit.html"><span class="nav-icon">📋</span> Audit Trail</a>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <div class="user-avatar" id="sidebarUserAvatar">A</div>
+                    <div class="user-meta">
+                        <h4 id="sidebarUserName">Admin PDP</h4>
+                        <span id="sidebarUserRole">DPO</span>
+                    </div>
+                    <button onclick="logout()"
+                        style="margin-left:auto; background:none; border:none; color:rgba(255,255,255,0.5); cursor:pointer; font-size:18px;"
+                        title="Logout">🚪</button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- MAIN -->
+        <div class="main-content">
+            <header class="topbar">
+                <div class="topbar-title">
+                    <h2>Dashboard PDP</h2>
+                    <p>Ringkasan kepatuhan & aktivitas data — <span id="todayDate"></span></p>
+                </div>
+                <div class="topbar-actions">
+                    <button class="topbar-icon-btn" title="Notifikasi"
+                        onclick="window.location.href='audit.html'">🔔<span class="notif-dot"></span></button>
+                    <button class="btn btn-primary btn-sm" onclick="window.location.href='consent.html'">+ Tambah
+                        Consent</button>
+                </div>
+            </header>
+
+            <div class="page-content">
+                <!-- ALERT STRIP -->
+                <div class="alert-strip warning" id="alertStrip">
+                    ⚠️ <strong>2 permintaan DSR</strong> menunggu proses dan <strong>1 insiden</strong> dalam
+                    investigasi. Segera tindak lanjut.
+                    <button onclick="document.getElementById('alertStrip').style.display='none'"
+                        style="margin-left:auto;background:none;border:none;cursor:pointer;color:inherit;">✕</button>
+                </div>
+
+                <!-- STATS -->
+                <div class="stats-grid">
+                    <div class="stat-card blue">
+                        <div class="stat-icon blue">🗂️</div>
+                        <div class="stat-value" id="statInv">0</div>
+                        <div class="stat-label">Inventaris Data</div>
+                        <div class="stat-trend neutral">📊 Kategori data terdaftar</div>
+                    </div>
+                    <div class="stat-card green">
+                        <div class="stat-icon green">✅</div>
+                        <div class="stat-value" id="statConsent">0</div>
+                        <div class="stat-label">Consent Aktif</div>
+                        <div class="stat-trend up">▲ Aktif & valid</div>
+                    </div>
+                    <div class="stat-card orange">
+                        <div class="stat-icon orange">👤</div>
+                        <div class="stat-value" id="statDsr">0</div>
+                        <div class="stat-label">DSR Menunggu</div>
+                        <div class="stat-trend down">⚠️ Perlu tindak lanjut</div>
+                    </div>
+                    <div class="stat-card red">
+                        <div class="stat-icon red">🚨</div>
+                        <div class="stat-value" id="statInsiden">0</div>
+                        <div class="stat-label">Insiden Aktif</div>
+                        <div class="stat-trend down">🔴 Dalam penanganan</div>
+                    </div>
+                    <div class="stat-card" style="background:var(--surface); border:1px solid var(--border)">
+                        <div class="stat-icon" style="background:var(--bg); color:var(--text-primary)">📁</div>
+                        <div class="stat-value" id="statPermintaan">0</div>
+                        <div class="stat-label">Permintaan Menunggu</div>
+                        <div class="stat-trend neutral">Menunggu Kadiv/DPO</div>
+                    </div>
+                </div>
+
+                <!-- ROW 2 -->
+                <div class="grid-2 section-gap">
+                    <!-- COMPLIANCE -->
+                    <div class="card">
+                        <div class="card-header">
+                            <div>
+                                <div class="card-title">🏆 Level Kepatuhan PDP</div>
+                                <div class="card-subtitle">Berdasarkan UU No. 27 Tahun 2022</div>
+                            </div>
+                            <span class="badge badge-warning">Update: Feb 2025</span>
+                        </div>
+                        <div class="compliance-widget">
+                            <div class="compliance-ring-wrap">
+                                <div class="compliance-ring" style="--pct:76">
+                                    <span class="compliance-value">76%</span>
+                                </div>
+                                <div>
+                                    <div
+                                        style="font-size:20px; font-weight:800; color:var(--warning); font-family:'Plus Jakarta Sans',sans-serif;">
+                                        Perlu Perbaikan</div>
+                                    <div style="font-size:13px; color:var(--text-secondary); margin-top:4px;">Target
+                                        kepatuhan penuh: Des 2025</div>
+                                    <div style="font-size:12px; color:var(--text-muted); margin-top:8px;">UU PDP berlaku
+                                        penuh: 19 Oktober 2024</div>
+                                </div>
+                            </div>
+                            <div class="compliance-items">
+                                <div class="compliance-item">
+                                    <label><span>Inventaris & Pemetaan Data</span><span
+                                            style="color:var(--success);font-weight:700;">90%</span></label>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill green" style="width:90%"></div>
+                                    </div>
+                                </div>
+                                <div class="compliance-item">
+                                    <label><span>Manajemen Consent</span><span
+                                            style="color:var(--warning);font-weight:700;">72%</span></label>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill orange" style="width:72%"></div>
+                                    </div>
+                                </div>
+                                <div class="compliance-item">
+                                    <label><span>Penanganan DSR</span><span
+                                            style="color:var(--success);font-weight:700;">80%</span></label>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill green" style="width:80%"></div>
+                                    </div>
+                                </div>
+                                <div class="compliance-item">
+                                    <label><span>Keamanan & Enkripsi</span><span
+                                            style="color:var(--warning);font-weight:700;">65%</span></label>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill orange" style="width:65%"></div>
+                                    </div>
+                                </div>
+                                <div class="compliance-item">
+                                    <label><span>Pelaporan Insiden</span><span
+                                            style="color:var(--danger);font-weight:700;">55%</span></label>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill red" style="width:55%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- QUICK ACTIONS + DEADLINES -->
+                    <div style="display:flex; flex-direction:column; gap:20px;">
+                        <!-- Quick Actions -->
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="card-title">⚡ Aksi Cepat</div>
+                            </div>
+                            <div class="quick-actions">
+                                <a href="consent.html" class="qa-card">
+                                    <div class="qa-icon">✅</div>
+                                    <h4>Baru Consent</h4>
+                                    <p>Tambahkan persetujuan</p>
+                                </a>
+                                <a href="dsr.html" class="qa-card">
+                                    <div class="qa-icon">👤</div>
+                                    <h4>Proses DSR</h4>
+                                    <p>Tangani permintaan</p>
+                                </a>
+                                <a href="insiden.html" class="qa-card">
+                                    <div class="qa-icon">🚨</div>
+                                    <h4>Laporkan Insiden</h4>
+                                    <p>Catat pelanggaran</p>
+                                </a>
+                                <a href="dpia.html" class="qa-card">
+                                    <div class="qa-icon">⚠️</div>
+                                    <h4>Mulai DPIA</h4>
+                                    <p>Penilaian risiko</p>
+                                </a>
+                                <a href="permintaan.html" class="qa-card">
+                                    <div class="qa-icon">📁</div>
+                                    <h4>Ajukan Permintaan</h4>
+                                    <p>Akses data internal</p>
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Upcoming Deadlines -->
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="card-title">📅 Deadline Mendatang</div>
+                            </div>
+                            <div class="deadline-item">
+                                <div class="deadline-days urgent">4</div>
+                                <div class="deadline-meta">
+                                    <h5>DSR-2025-003 — Hak Hapus</h5>
+                                    <p>Budi Santoso · Deadline: 19 Feb 2025</p>
+                                </div>
+                                <a href="dsr.html" class="btn btn-danger btn-sm" style="margin-left:auto;">Proses</a>
+                            </div>
+                            <div class="deadline-item">
+                                <div class="deadline-days warn">22</div>
+                                <div class="deadline-meta">
+                                    <h5>DPIA — CRM Pihak Ketiga</h5>
+                                    <p>Target selesai: 31 Jan 2025</p>
+                                </div>
+                                <a href="dpia.html" class="btn btn-warning btn-sm" style="margin-left:auto;">Review</a>
+                            </div>
+                            <div class="deadline-item">
+                                <div class="deadline-days ok">45</div>
+                                <div class="deadline-meta">
+                                    <h5>Laporan Kepatuhan Kuartalan</h5>
+                                    <p>Deadline: Q1 2025</p>
+                                </div>
+                                <a href="dokumen.html" class="btn btn-outline btn-sm"
+                                    style="margin-left:auto;">Siapkan</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ROW 3: Activities + Summary -->
+                <div class="grid-2">
+                    <!-- Recent Activity -->
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">🕐 Aktivitas Terbaru</div>
+                            <a href="audit.html" class="btn btn-outline btn-sm">Lihat Semua</a>
+                        </div>
+                        <div id="recentActivities">
+                            <div class="activity-item">
+                                <div class="activity-dot green"></div>
+                                <div class="activity-text">
+                                    <h5>Consent CNS-2024-001 disetujui</h5>
+                                    <p>Admin PDP · Email notif terkirim ke ahmad.fauzi@gmail.com · 5 jam lalu</p>
+                                </div>
+                            </div>
+                            <div class="activity-item">
+                                <div class="activity-dot blue"></div>
+                                <div class="activity-text">
+                                    <h5>DSR-2024-001 (Hak Akses) selesai</h5>
+                                    <p>IT Staff · Selesai dalam 18 hari · 8 jam lalu</p>
+                                </div>
+                            </div>
+                            <div class="activity-item">
+                                <div class="activity-dot red"></div>
+                                <div class="activity-text">
+                                    <h5>Insiden INC-2025-002 dilaporkan</h5>
+                                    <p>DPO · Laptop hilang berisi data sensitif · 1 hari lalu</p>
+                                </div>
+                            </div>
+                            <div class="activity-item">
+                                <div class="activity-dot orange"></div>
+                                <div class="activity-text">
+                                    <h5>DPIA-002 diperbarui</h5>
+                                    <p>IT & Marketing · Skor risiko: 85 (Tinggi) · 2 hari lalu</p>
+                                </div>
+                            </div>
+                            <div class="activity-item">
+                                <div class="activity-dot blue"></div>
+                                <div class="activity-text">
+                                    <h5>Kebijakan Privasi v2.1 diterbitkan</h5>
+                                    <p>Legal · Dokumen baru ditambahkan · 3 hari lalu</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Data by Category -->
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">📊 Data Pribadi per Kategori</div>
+                        </div>
+                        <div style="display:flex; flex-direction:column; gap:10px; margin-top:4px;">
+                            <div>
+                                <div style="display:flex; justify-content:space-between; margin-bottom:5px;"><span
+                                        class="text-sm font-bold">SDM (Karyawan)</span><span
+                                        class="badge badge-danger">Sensitif</span></div>
+                                <div class="progress-bar" style="height:10px;">
+                                    <div class="progress-fill" style="width:85%"></div>
+                                </div>
+                                <div class="text-muted" style="margin-top:3px;">2 kategori · 1 sensitif · enkripsi aktif
+                                </div>
+                            </div>
+                            <div>
+                                <div style="display:flex; justify-content:space-between; margin-bottom:5px;"><span
+                                        class="text-sm font-bold">Pelanggan (CRM)</span><span
+                                        class="badge badge-warning">Sedang</span></div>
+                                <div class="progress-bar" style="height:10px;">
+                                    <div class="progress-fill orange" style="width:60%"></div>
+                                </div>
+                                <div class="text-muted" style="margin-top:3px;">1 kategori · cloud storage · DPA
+                                    diperlukan</div>
+                            </div>
+                            <div>
+                                <div style="display:flex; justify-content:space-between; margin-bottom:5px;"><span
+                                        class="text-sm font-bold">Keuangan</span><span
+                                        class="badge badge-danger">Sensitif</span></div>
+                                <div class="progress-bar" style="height:10px;">
+                                    <div class="progress-fill red" style="width:75%"></div>
+                                </div>
+                                <div class="text-muted" style="margin-top:3px;">1 kategori · on-premise · retensi 7
+                                    tahun</div>
+                            </div>
+                            <div>
+                                <div style="display:flex; justify-content:space-between; margin-bottom:5px;"><span
+                                        class="text-sm font-bold">IT & Teknis</span><span
+                                        class="badge badge-info">Rendah</span></div>
+                                <div class="progress-bar" style="height:10px;">
+                                    <div class="progress-fill green" style="width:30%"></div>
+                                </div>
+                                <div class="text-muted" style="margin-top:3px;">1 kategori · log akses · retensi 1 tahun
+                                </div>
+                            </div>
+                        </div>
+                        <hr class="divider">
+                        <div style="display:flex; gap:16px; justify-content:center;">
+                            <div style="text-align:center;"><span
+                                    style="font-size:22px;font-weight:800;color:var(--primary);font-family:'Plus Jakarta Sans',sans-serif;">5</span>
+                                <p class="text-muted">Total Kategori</p>
+                            </div>
+                            <div style="text-align:center;"><span
+                                    style="font-size:22px;font-weight:800;color:var(--danger);font-family:'Plus Jakarta Sans',sans-serif;">2</span>
+                                <p class="text-muted">Data Sensitif</p>
+                            </div>
+                            <div style="text-align:center;"><span
+                                    style="font-size:22px;font-weight:800;color:var(--success);font-family:'Plus Jakarta Sans',sans-serif;">4</span>
+                                <p class="text-muted">Terenkripsi</p>
+                            </div>
+                            <div style="text-align:center;"><span
+                                    style="font-size:22px;font-weight:800;color:var(--warning);font-family:'Plus Jakarta Sans',sans-serif;">1</span>
+                                <p class="text-muted">Pihak Ketiga</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast-container" id="toastContainer"></div>
+    <script src="app.js"></script>
+    <script>
+        document.getElementById('todayDate').textContent = new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+
+        function loadStats() {
+            const consents = JSON.parse(localStorage.getItem('pdp_consents') || '[]');
+            const dsr = JSON.parse(localStorage.getItem('pdp_dsr') || '[]');
+            const inv = JSON.parse(localStorage.getItem('pdp_inventaris') || '[]');
+            const ins = JSON.parse(localStorage.getItem('pdp_insiden') || '[]');
+            const req = JSON.parse(localStorage.getItem('pdp_permintaan') || '[]');
+
+            document.getElementById('statConsent').textContent = consents.filter(c => c.status === 'DISETUJUI').length;
+            document.getElementById('statDsr').textContent = dsr.filter(d => d.status === 'MENUNGGU' || d.status === 'PROSES').length;
+            document.getElementById('statInv').textContent = inv.length;
+            document.getElementById('statInsiden').textContent = ins.filter(i => i.status === 'INVESTIGASI' || i.status === 'PROSES').length;
+
+            if (document.getElementById('statPermintaan')) {
+                document.getElementById('statPermintaan').textContent = req.filter(r => r.status === 'MENUNGGU_KADIV' || r.status === 'MENUNGGU_DPO').length;
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => { requireAuth(); loadStats(); });
+    </script>
+</body>
+
+</html>

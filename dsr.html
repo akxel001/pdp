@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hak Subjek Data (DSR) — Sistem PDP PT Atri Pasifik</title>
+    <link rel="stylesheet" href="style-pdp.css">
+</head>
+
+<body>
+    <div class="app-layout">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo"><img src="logo-atri.png" alt="AP"
+                        onerror="this.style.display='none'; this.parentElement.innerHTML='<span style=\'font-size:16px;font-weight:800;color:#1B2B6B\'>AP</span>'">
+                </div>
+                <div class="sidebar-brand">
+                    <h3>Sistem PDP</h3><span>PT Atri Pasifik</span>
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-section-title">Menu Utama</div>
+                <a class="nav-item" href="dashboard.html"><span class="nav-icon">📊</span> Dashboard</a>
+                <a class="nav-item" href="inventaris.html"><span class="nav-icon">🗂️</span> Inventaris Data</a>
+                <a class="nav-item" href="consent.html"><span class="nav-icon">✅</span> Manajemen Consent</a>
+                <a class="nav-item active" href="dsr.html"><span class="nav-icon">👤</span> Hak Subjek Data</a>
+                <a class="nav-item" href="permintaan.html"><span class="nav-icon">📁</span> Permintaan Internal</a>
+                <div class="nav-section-title">Kepatuhan</div>
+                <a class="nav-item" href="dpia.html"><span class="nav-icon">⚠️</span> Penilaian Risiko (DPIA)</a>
+                <a class="nav-item" href="insiden.html"><span class="nav-icon">🚨</span> Insiden & Pelanggaran</a>
+                <div class="nav-section-title">Administrasi</div>
+                <a class="nav-item" href="dokumen.html"><span class="nav-icon">📄</span> Dokumen & Kebijakan</a>
+                <a class="nav-item" href="audit.html"><span class="nav-icon">📋</span> Audit Trail</a>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <div class="user-avatar" id="sidebarUserAvatar">A</div>
+                    <div class="user-meta">
+                        <h4 id="sidebarUserName">Admin PDP</h4><span id="sidebarUserRole">DPO</span>
+                    </div>
+                    <button onclick="logout()"
+                        style="margin-left:auto;background:none;border:none;color:rgba(255,255,255,0.5);cursor:pointer;font-size:18px;">🚪</button>
+                </div>
+            </div>
+        </aside>
+
+        <div class="main-content">
+            <header class="topbar">
+                <div class="topbar-title">
+                    <h2>Hak Subjek Data (DSR)</h2>
+                    <p>Kelola permintaan hak subjek data · Pasal 5–9 UU PDP No. 27/2022 · Notifikasi email otomatis</p>
+                </div>
+                <div class="topbar-actions">
+                    <div class="search-bar">
+                        <span>🔍</span>
+                        <input type="text" id="searchDsr" placeholder="Cari nama, ID, jenis hak..."
+                            oninput="filterTable('searchDsr','dsrTable')">
+                    </div>
+                    <button class="btn btn-primary" onclick="openModal('modalTambahDsr')">+ Tambah DSR</button>
+                </div>
+            </header>
+
+            <div class="page-content">
+                <div class="alert-strip info" style="margin-bottom:20px;">
+                    ℹ️ Sesuai <strong>Pasal 5–9 UU PDP</strong>, perusahaan wajib menyelesaikan permintaan subjek data
+                    dalam <strong>30 hari kerja</strong>. Notifikasi email dikirim otomatis saat status berubah.
+                </div>
+
+                <!-- Hak-hak Cards -->
+                <div style="display:grid; grid-template-columns:repeat(5,1fr); gap:12px; margin-bottom:24px;">
+                    <div
+                        style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-md); padding:14px; text-align:center;">
+                        <div style="font-size:22px;">👁️</div>
+                        <div style="font-size:12px; font-weight:700; margin-top:6px; color:var(--text-primary);">Hak
+                            Akses</div>
+                        <div style="font-size:11px; color:var(--text-muted);">Pasal 5</div>
+                    </div>
+                    <div
+                        style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-md); padding:14px; text-align:center;">
+                        <div style="font-size:22px;">✏️</div>
+                        <div style="font-size:12px; font-weight:700; margin-top:6px; color:var(--text-primary);">Hak
+                            Koreksi</div>
+                        <div style="font-size:11px; color:var(--text-muted);">Pasal 6</div>
+                    </div>
+                    <div
+                        style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-md); padding:14px; text-align:center;">
+                        <div style="font-size:22px;">🗑️</div>
+                        <div style="font-size:12px; font-weight:700; margin-top:6px; color:var(--text-primary);">Hak
+                            Hapus</div>
+                        <div style="font-size:11px; color:var(--text-muted);">Pasal 7</div>
+                    </div>
+                    <div
+                        style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-md); padding:14px; text-align:center;">
+                        <div style="font-size:22px;">📦</div>
+                        <div style="font-size:12px; font-weight:700; margin-top:6px; color:var(--text-primary);">Hak
+                            Portabilitas</div>
+                        <div style="font-size:11px; color:var(--text-muted);">Pasal 8</div>
+                    </div>
+                    <div
+                        style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-md); padding:14px; text-align:center;">
+                        <div style="font-size:22px;">🚫</div>
+                        <div style="font-size:12px; font-weight:700; margin-top:6px; color:var(--text-primary);">Hak
+                            Keberatan</div>
+                        <div style="font-size:11px; color:var(--text-muted);">Pasal 9</div>
+                    </div>
+                </div>
+
+                <!-- Stats -->
+                <div class="stats-grid" style="grid-template-columns:repeat(4,1fr); margin-bottom:20px;">
+                    <div class="stat-card orange">
+                        <div class="stat-icon orange">⏳</div>
+                        <div class="stat-value" id="dsrMenunggu">0</div>
+                        <div class="stat-label">Menunggu Proses</div>
+                    </div>
+                    <div class="stat-card blue">
+                        <div class="stat-icon blue">⚙️</div>
+                        <div class="stat-value" id="dsrProses">0</div>
+                        <div class="stat-label">Sedang Diproses</div>
+                    </div>
+                    <div class="stat-card green">
+                        <div class="stat-icon green">✅</div>
+                        <div class="stat-value" id="dsrSelesai">0</div>
+                        <div class="stat-label">Selesai</div>
+                    </div>
+                    <div class="stat-card blue">
+                        <div class="stat-icon blue">📊</div>
+                        <div class="stat-value" id="dsrTotal">0</div>
+                        <div class="stat-label">Total DSR</div>
+                    </div>
+                </div>
+
+                <div class="card" style="padding:0;">
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Subjek Data</th>
+                                    <th>Jenis Hak</th>
+                                    <th>Deskripsi</th>
+                                    <th>Dept</th>
+                                    <th>Tgl Masuk</th>
+                                    <th>Deadline</th>
+                                    <th>Status</th>
+                                    <th>Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="dsrTable"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: Tambah DSR -->
+    <div class="modal-overlay" id="modalTambahDsr">
+        <div class="modal" style="max-width:600px;">
+            <div class="modal-header">
+                <div class="modal-icon info">👤</div>
+                <div>
+                    <div class="modal-title">Tambah Permintaan DSR Baru</div>
+                    <div class="modal-subtitle">Data Subject Request — UU PDP Pasal 5–9</div>
+                </div>
+                <button class="modal-close" onclick="closeModal('modalTambahDsr')">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label class="form-label">Nama Subjek <span class="required">*</span></label>
+                        <div class="input-wrapper"><span class="input-icon">👤</span><input type="text" id="d_nama"
+                                class="form-control" placeholder="Nama lengkap"></div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Email Subjek <span class="required">*</span></label>
+                        <div class="input-wrapper"><span class="input-icon">📧</span><input type="email" id="d_email"
+                                class="form-control" placeholder="email@domain.com"></div>
+                    </div>
+                </div>
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label class="form-label">Jenis Hak <span class="required">*</span></label>
+                        <select id="d_hak" class="form-control form-select no-icon">
+                            <option value="">-- Pilih Jenis Hak --</option>
+                            <option>Hak Akses</option>
+                            <option>Hak Koreksi</option>
+                            <option>Hak Hapus</option>
+                            <option>Hak Portabilitas</option>
+                            <option>Hak Keberatan</option>
+                            <option>Hak Penarikan Consent</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Departemen PIC</label>
+                        <select id="d_dept" class="form-control form-select no-icon">
+                            <option>IT</option>
+                            <option>HR</option>
+                            <option>Legal</option>
+                            <option>Marketing</option>
+                            <option>Finance</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Deskripsi Permintaan <span class="required">*</span></label>
+                    <textarea id="d_desc" class="form-control no-icon" rows="3"
+                        placeholder="Jelaskan detail permintaan subjek data..."></textarea>
+                </div>
+                <div class="alert-strip info">📧 Notifikasi email dikirim otomatis ke subjek data saat status diperbarui
+                    (Disetujui / Ditolak / Selesai).</div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeModal('modalTambahDsr')">Batal</button>
+                <button class="btn btn-primary" onclick="tambahDsr()">Simpan & Daftarkan</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: Update Status DSR dengan email -->
+    <div class="modal-overlay" id="modalUpdateDsr">
+        <div class="modal" style="max-width:520px;">
+            <div class="modal-header">
+                <div class="modal-icon info" id="updateDsrIcon">⚙️</div>
+                <div>
+                    <div class="modal-title" id="updateDsrTitle">Update Status DSR</div>
+                    <div class="modal-subtitle">Email notifikasi akan dikirim ke subjek data</div>
+                </div>
+                <button class="modal-close" onclick="closeModal('modalUpdateDsr')">✕</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="updateDsrId">
+                <div class="form-group">
+                    <label class="form-label">Status Baru <span class="required">*</span></label>
+                    <select id="updateDsrStatus" class="form-control form-select no-icon">
+                        <option value="PROSES">Sedang Diproses</option>
+                        <option value="SELESAI">Selesai / Disetujui</option>
+                        <option value="DITOLAK">Ditolak</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Catatan / Alasan <span class="required">*</span></label>
+                    <textarea id="updateDsrNote" class="form-control no-icon" rows="3"
+                        placeholder="Berikan keterangan lengkap..."></textarea>
+                </div>
+                <div class="alert-strip info">📧 Email otomatis dikirim ke: <strong id="updateDsrEmail"></strong></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeModal('modalUpdateDsr')">Batal</button>
+                <button class="btn btn-primary" onclick="confirmUpdateDsr()">✅ Update & Kirim Email</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast-container" id="toastContainer"></div>
+    <script src="app.js"></script>
+    <script>
+        function renderDsr() {
+            const data = JSON.parse(localStorage.getItem('pdp_dsr') || '[]');
+            document.getElementById('dsrMenunggu').textContent = data.filter(d => d.status === 'MENUNGGU').length;
+            document.getElementById('dsrProses').textContent = data.filter(d => d.status === 'PROSES').length;
+            document.getElementById('dsrSelesai').textContent = data.filter(d => d.status === 'SELESAI').length;
+            document.getElementById('dsrTotal').textContent = data.length;
+
+            const hakIcon = { 'Hak Akses': '👁️', 'Hak Koreksi': '✏️', 'Hak Hapus': '🗑️', 'Hak Portabilitas': '📦', 'Hak Keberatan': '🚫', 'Hak Penarikan Consent': '↩️' };
+            document.getElementById('dsrTable').innerHTML = data.map(d => {
+                const deadline = new Date(d.tglDeadline);
+                const daysLeft = Math.ceil((deadline - new Date()) / 86400000);
+                const dlClass = daysLeft < 5 ? 'danger' : daysLeft < 15 ? 'warning' : 'success';
+                return `<tr>
+        <td><code style="font-size:11px;background:var(--bg);padding:2px 6px;border-radius:4px;">${d.id}</code></td>
+        <td><div class="td-name">${d.subjek}</div><div class="td-meta">📧 ${d.email}</div></td>
+        <td><span class="badge badge-primary">${hakIcon[d.hak] || '📋'} ${d.hak}</span></td>
+        <td><div style="max-width:180px;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${d.deskripsi}">${d.deskripsi}</div></td>
+        <td><span class="badge badge-default">${d.dept}</span></td>
+        <td class="td-meta">${formatDate(d.tglMasuk)}</td>
+        <td><span class="badge badge-${dlClass}" style="font-size:11px;">${d.status === 'SELESAI' ? '✅ Selesai' : formatDate(d.tglDeadline)}</span></td>
+        <td>${statusBadge(d.status)}</td>
+        <td>
+          ${d.status !== 'SELESAI' ? `<button class="btn btn-primary btn-sm" onclick="openUpdateDsr('${d.id}')">Update</button>` : `<span class="td-meta">✅ Done</span>`}
+        </td>
+      </tr>`;
+            }).join('') || `<tr><td colspan="9"><div class="empty-state"><div class="empty-icon">👤</div><h4>Belum ada permintaan DSR</h4></div></td></tr>`;
+        }
+
+        function tambahDsr() {
+            const nama = document.getElementById('d_nama').value.trim();
+            const email = document.getElementById('d_email').value.trim();
+            const hak = document.getElementById('d_hak').value;
+            const desc = document.getElementById('d_desc').value.trim();
+            if (!nama || !email || !hak || !desc) { showToast('Form Tidak Lengkap', 'Isi semua field wajib', 'error'); return; }
+            const data = JSON.parse(localStorage.getItem('pdp_dsr') || '[]');
+            const today = new Date();
+            const deadline = new Date(today.getTime() + 30 * 86400000);
+            const d = {
+                id: generateId('DSR'), subjek: nama, email, hak, deskripsi: desc,
+                dept: document.getElementById('d_dept').value,
+                status: 'MENUNGGU',
+                tglMasuk: today.toISOString().split('T')[0],
+                tglDeadline: deadline.toISOString().split('T')[0],
+                tglSelesai: null, catatan: ''
+            };
+            data.unshift(d);
+            localStorage.setItem('pdp_dsr', JSON.stringify(data));
+            addAuditLog('DSR_CREATE', `DSR baru ${d.id} (${hak}) dari ${nama}`);
+            closeModal('modalTambahDsr');
+            renderDsr();
+            showToast('DSR Didaftarkan', `${d.id} berhasil disimpan. Deadline: ${formatDate(d.tglDeadline)}`, 'success');
+        }
+
+        function openUpdateDsr(id) {
+            const data = JSON.parse(localStorage.getItem('pdp_dsr') || '[]');
+            const d = data.find(x => x.id === id);
+            document.getElementById('updateDsrId').value = id;
+            document.getElementById('updateDsrTitle').textContent = `Update DSR: ${id}`;
+            document.getElementById('updateDsrEmail').textContent = d.email;
+            document.getElementById('updateDsrNote').value = d.catatan || '';
+            openModal('modalUpdateDsr');
+        }
+
+        function confirmUpdateDsr() {
+            const id = document.getElementById('updateDsrId').value;
+            const newStatus = document.getElementById('updateDsrStatus').value;
+            const note = document.getElementById('updateDsrNote').value.trim();
+            if (!note) { showToast('Catatan Diperlukan', 'Isi catatan/alasan update status', 'error'); return; }
+
+            const data = JSON.parse(localStorage.getItem('pdp_dsr') || '[]');
+            const d = data.find(x => x.id === id);
+            if (!d) return;
+            d.status = newStatus;
+            d.catatan = note;
+            if (newStatus === 'SELESAI') d.tglSelesai = new Date().toISOString().split('T')[0];
+            localStorage.setItem('pdp_dsr', JSON.stringify(data));
+            addAuditLog('DSR_UPDATE', `DSR ${id} status → ${newStatus} — ${note}`);
+            closeModal('modalUpdateDsr');
+            renderDsr();
+
+            // 📧 KIRIM EMAIL NOTIFIKASI KE SUBJEK DATA
+            EmailNotif.send({
+                to: d.email, toName: d.subjek,
+                type: 'dsr', requestId: d.id,
+                requestType: d.hak,
+                status: newStatus === 'SELESAI' ? 'DISETUJUI' : newStatus === 'DITOLAK' ? 'DITOLAK' : 'DIPROSES',
+                reason: note
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => { requireAuth(); renderDsr(); });
+    </script>
+</body>
+
+</html>
